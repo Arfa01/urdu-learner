@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Placement Test - Urdu Learning</title>
+    <script src="/js/ui-preferences.js"></script>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <h2>Placement Test</h2>
+        <div class="nav-right">
+            <span class="user-name">Hi, <%= user.username %></span>
+            <a href="/logout" class="btn btn-small">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="assessment-section">
+            <h3>🎯 Find your starting level</h3>
+            <p class="instruction">
+                Complete the quick test below. We’ll recommend a starting level, and you can still choose a different one.
+            </p>
+
+            <% if (placement && placement.taken) { %>
+                <div class="score-display" style="margin-bottom: 1rem;">
+                    Placement already completed. Current level: <strong><%= placement.chosenLevel %></strong> (recommended: <%= placement.recommendedLevel %>)
+                </div>
+                <% } %>
+        </div>
+
+        <section class="assessment-section">
+            <h3>1) Letters</h3>
+            <p class="instruction">Choose the correct romanization for each Urdu letter.</p>
+            <div id="letters-quiz" class="mcq-quiz"></div>
+        </section>
+
+        <section class="assessment-section">
+            <h3>2) Words</h3>
+            <p class="instruction">Choose the correct meaning for each Urdu word.</p>
+            <div id="words-quiz" class="mcq-quiz"></div>
+        </section>
+
+        <section class="assessment-section">
+            <h3>3) Pronunciation</h3>
+            <p class="instruction">Listen, then read the sentence out loud.</p>
+
+            <div style="background: #f9f9f9; padding: 1.5rem; border-radius: 10px; border: 2px solid #e0e0e0;">
+                <p class="urdu-text" id="pronunciation-target" style="font-size: 1.8rem;">میں اردو سیکھ رہا ہوں۔</p>
+                <div style="display:flex; gap: 1rem; margin-top: 1rem; flex-wrap: wrap;">
+                    <button class="btn btn-small" id="pronounce-listen">🔊 Listen</button>
+                    <button class="btn btn-small record-btn" id="pronounce-record">🎤 Record</button>
+                </div>
+                <div id="pronunciation-result" class="result-box"></div>
+            </div>
+        </section>
+
+        <section class="assessment-section">
+            <h3>Result</h3>
+            <p class="instruction">We’ll recommend a starting level. You can accept it or pick a different one.</p>
+
+            <div id="placement-summary" class="score-display">
+                Complete the test to see your recommendation.
+            </div>
+
+            <div style="margin-top: 1rem; display:flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                <label for="chosenLevel"><strong>Choose your level:</strong></label>
+                <select id="chosenLevel" style="padding: 0.8rem 1rem; border-radius: 8px; border: 2px solid #e0e0e0;"></select>
+                <button class="btn btn-primary" id="savePlacement">Save & Show Results</button>
+                <a class="btn btn-primary" id="goDashboard" href="/dashboard" style="display:none;">Go to Dashboard</a>
+            </div>
+
+            <div id="save-error" class="error" style="display:none; margin-top: 1rem;"></div>
+        </section>
+    </div>
+
+    <script>
+        window.__PLACEMENT_INITIAL__ = {
+            assignedLevel: <%- JSON.stringify(assignedLevel || 1) %>,
+            placement: <%- JSON.stringify(placement || { taken: false }) %>
+        };
+    </script>
+    <script src="/js/urdu-similarity.js"></script>
+    <script src="/js/placement-test.js"></script>
+</body>
+
+</html>

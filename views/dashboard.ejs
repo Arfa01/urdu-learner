@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Urdu Learning</title>
+    <script src="/js/ui-preferences.js"></script>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <h2>Urdu-daan</h2>
+        <div class="nav-right">
+            <span class="user-name">Welcome, <%= user.username %>!</span>
+            <span class="points">🏆 <%= user.totalPoints %> points</span>
+            <span class="rank-badge" data-rank="<%= user.rank || 'Bronze' %>">🏅 <%= user.rank || 'Bronze' %></span>
+            <span class="streak-badge">🔥 <%= (user.practiceStats && user.practiceStats.currentStreak) ?
+                    user.practiceStats.currentStreak : 0 %> day streak</span>
+
+            <a href="/blog" class="btn btn-small">Community</a>
+
+            <button class="profile-btn" id="profileBtn" type="button" aria-label="Profile menu" title="Profile">
+                <span class="profile-avatar">
+                    <% if (user.avatarUrl) { %>
+                        <img src="<%= user.avatarUrl %>" alt="<%= user.username %>"
+                            style="width:100%;height:100%;border-radius:999px;object-fit:cover;" />
+                        <% } else { %>
+                            <%= (user.username || 'U' ).slice(0, 1).toUpperCase() %>
+                                <% } %>
+                </span>
+                <span class="profile-caret">▾</span>
+            </button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Word of the Day full-width at the top -->
+        <section class="assessment-section" style="padding:1.5rem; margin-top:1rem;">
+            <div class="content-header" style="margin-bottom:0.75rem;">
+                <div>
+                    <h3 style="margin:0;">📖 Word of the Day</h3>
+                    <p class="muted" style="margin:0.2rem 0 0;">Practice one new Urdu word every day.</p>
+                </div>
+            </div>
+            <div class="quiz-box" style="margin-top:0.5rem;">
+                <div class="quiz-question urdu-text" dir="rtl" style="font-size:2.2rem;">
+                    <%= wordOfDay.urdu %>
+                </div>
+                <% if (wordOfDay.romanUrdu) { %>
+                    <div class="muted" style="margin-top:0.25rem;">(<%= wordOfDay.romanUrdu %>)</div>
+                    <% } %>
+                        <div class="quiz-options" style="margin-top:0.75rem;">
+                            <button type="button" class="btn btn-small" onclick="speakUrdu('<%= wordOfDay.urdu %>')">🔊
+                                سنیں</button>
+                        </div>
+            </div>
+        </section>
+
+        <!-- Progress + continue CTA -->
+        <section class="progress-summary" style="margin-top:1.25rem;">
+            <div class="dashboard-hero-left" style="margin-bottom:0.75rem;">
+                <h3 style="margin-bottom:0.4rem;">Welcome back, <%= user.username %>
+                </h3>
+                <p class="muted" style="margin:0;">Continue your next lesson, review words, and play practice games.</p>
+            </div>
+            <div style="display:flex; flex-wrap:wrap; gap:0.75rem; align-items:center; margin-bottom:0.75rem;">
+                <span class="points">🏆 <%= user.totalPoints %> points</span>
+                <span class="rank-badge" data-rank="<%= user.rank || 'Bronze' %>">🏅 <%= user.rank || 'Bronze' %></span>
+                <span class="streak-badge">🔥 <%= (user.practiceStats && user.practiceStats.currentStreak) ?
+                        user.practiceStats.currentStreak : 0 %> day streak</span>
+            </div>
+            <p class="progress-text" style="margin-bottom:0.5rem;">
+                Completed lessons: <strong>
+                    <%= user.completedLessons.length %> / 50
+                </strong>
+            </p>
+            <div class="progress-bar" style="height: 18px;">
+                <div class="progress-fill" style="width: <%= (user.completedLessons.length / 50) * 100 %>%"></div>
+            </div>
+            <% if (currentLessonMeta && currentLessonMeta.totalPercent> 0) { %>
+                <p class="muted" style="margin-top:0.6rem;">
+                    موجودہ lesson کا بہترین اسکور: <strong>
+                        <%= currentLessonMeta.totalOutOf10 %>/10
+                    </strong> (<%= currentLessonMeta.totalPercent %>%)
+                </p>
+                <% } %>
+
+                    <div class="lessons-cta">
+                        <div class="lessons-cta-main">
+                            <span class="lessons-cta-label">Your lessons</span>
+                            <span class="muted">Jump back into your current lesson or browse all 50 units.</span>
+                        </div>
+                        <div class="lessons-cta-actions">
+                            <a href="/lesson/<%= currentLessonNumber %>" class="btn btn-primary">Continue Lesson <%=
+                                    currentLessonNumber %> →</a>
+                            <a href="/lessons" class="btn btn-small btn-lessons-outline">View all lessons</a>
+                        </div>
+                    </div>
+        </section>
+
+        <!-- Features below in full-width rows -->
+        <section class="assessment-section" style="padding:1.4rem; margin-top:1.25rem;">
+            <h3 style="margin-bottom:0.75rem;">🚀 Start & Explore</h3>
+            <div class="action-cards" style="grid-template-columns: 1fr;">
+                <a class="action-card action-card-primary" href="/lesson/<%= currentLessonNumber %>">
+                    <div class="action-card-top">
+                        <div class="action-card-title">Current Lesson</div>
+                        <div class="pill">Lesson <%= currentLessonNumber %>
+                        </div>
+                    </div>
+                    <div class="action-card-body">
+                        <div class="action-card-subtitle">
+                            <%= currentLesson ? currentLesson.title : 'Start your learning path' %>
+                        </div>
+                    </div>
+                    <div class="action-card-footer">
+                        <span class="muted">Open →</span>
+                    </div>
+                </a>
+
+                <a class="action-card" href="/analytics">
+                    <div class="action-card-top">
+                        <div class="action-card-title">📈 Analytics</div>
+                        <div class="pill">Progress</div>
+                    </div>
+                    <div class="action-card-body">
+                        <div class="action-card-subtitle">See your vocabulary growth, grammar areas, and game accuracy.
+                        </div>
+                    </div>
+                    <div class="action-card-footer"><span class="muted">Open →</span></div>
+                </a>
+
+                <a class="action-card" href="/learn-yourself">
+                    <div class="action-card-top">
+                        <div class="action-card-title">🧠 Learn Yourself</div>
+                        <div class="pill">Translate</div>
+                    </div>
+                    <div class="action-card-body">
+                        <div class="action-card-subtitle">Translate English to Urdu, pick words, and build quick
+                            flashcard quizzes.</div>
+                    </div>
+                    <div class="action-card-footer"><span class="muted">Open →</span></div>
+                </a>
+
+                <a class="action-card" href="/games">
+                    <div class="action-card-top">
+                        <div class="action-card-title">🎮 Word Games</div>
+                        <div class="pill">Play</div>
+                    </div>
+                    <div class="action-card-body">
+                        <div class="action-card-subtitle">Play scramble, crossword, hangman, bingo and other word games.
+                        </div>
+                    </div>
+                    <div class="action-card-footer"><span class="muted">Open →</span></div>
+                </a>
+
+                <a class="action-card" href="/culture">
+                    <div class="action-card-top">
+                        <div class="action-card-title">🕌 Cultural Corner</div>
+                        <div class="pill">Stories</div>
+                    </div>
+                    <div class="action-card-body">
+                        <div class="action-card-subtitle">Read Urdu stories, idioms, and folk tales with practice
+                            activities.</div>
+                    </div>
+                    <div class="action-card-footer"><span class="muted">Open →</span></div>
+                </a>
+
+                <a class="action-card" href="/context-words">
+                    <div class="action-card-top">
+                        <div class="action-card-title">🧩 Context Words</div>
+                        <div class="pill">Meaning</div>
+                    </div>
+                    <div class="action-card-body">
+                        <div class="action-card-subtitle">Learn how one word changes meaning in different contexts.
+                        </div>
+                    </div>
+                    <div class="action-card-footer"><span class="muted">Open →</span></div>
+                </a>
+
+                <a class="action-card" href="/blog">
+                    <div class="action-card-top">
+                        <div class="action-card-title">✍️ Community Blog</div>
+                        <div class="pill">Posts</div>
+                    </div>
+                    <div class="action-card-body">
+                        <div class="action-card-subtitle">Share updates, stories, and questions with the Urdu learning
+                            community.</div>
+                    </div>
+                    <div class="action-card-footer"><span class="muted">Open →</span></div>
+                </a>
+            </div>
+        </section>
+    </div>
+
+    <!-- Profile / Help / Settings Modal -->
+    <div id="profileModal" class="modal" aria-hidden="true">
+        <div class="modal-backdrop" data-close></div>
+        <div class="modal-card" role="dialog" aria-modal="true" aria-label="Profile">
+            <div class="modal-top">
+                <div>
+                    <div class="modal-title">
+                        <%= user.username %>
+                    </div>
+                    <div class="muted">
+                        <%= user.email %>
+                    </div>
+                </div>
+                <button class="icon-btn icon-btn-small" type="button" aria-label="Close" data-close>
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M6 6l12 12M18 6 6 18" />
+                    </svg>
+                </button>
+            </div>
+
+            <div class="modal-tabs">
+                <button class="tab active" type="button" data-tab="help">How to use</button>
+                <button class="tab" type="button" data-tab="settings">Settings</button>
+            </div>
+
+            <div class="modal-body">
+                <div data-panel="help">
+                    <div class="howto">
+                        <h3>How to explore the website</h3>
+                        <ul>
+                            <li><strong>Lessons → Current Lesson</strong>: Continue your next lesson automatically.</li>
+                            <li><strong>Lessons → All Lessons</strong>: Browse lessons 1–50 and revisit any lesson
+                                anytime.</li>
+                            <li><strong>Inside a Lesson</strong>: You’ll see 4 assessment pages (Words, Sentences,
+                                Passage, Quiz). Use the <strong>top icons</strong> or <strong>Next/Skip</strong> buttons
+                                to move.</li>
+                            <li><strong>Stars</strong>: After finishing a lesson, your performance becomes 1–3 stars
+                                (like a game stage).</li>
+                            <li><strong>Cultural Corner</strong>: Read stories/idioms and play quick challenges. A
+                                perfect clear shows a big 3‑star celebration.</li>
+                            <li><strong>Context Words</strong>: Learn how meaning changes by situation; practice with
+                                quizzes and duel-style games.</li>
+                            <li><strong>Learn Yourself</strong>: Paste text to translate, learn words, and generate a
+                                quiz automatically.</li>
+                        </ul>
+                        <div class="muted" style="margin-top:0.75rem;">Tip: Use Settings to switch dark mode and adjust
+                            font size.</div>
+                    </div>
+                </div>
+
+                <div data-panel="settings" style="display:none;">
+                    <div class="settings-grid">
+                        <div class="settings-row">
+                            <div>
+                                <div class="settings-label">Dark mode</div>
+                                <div class="muted">Switch between light and dark theme.</div>
+                            </div>
+                            <label class="toggle">
+                                <input id="themeToggle" type="checkbox" />
+                                <span class="toggle-track" aria-hidden="true"></span>
+                            </label>
+                        </div>
+
+                        <div class="settings-row">
+                            <div>
+                                <div class="settings-label">Font size</div>
+                                <div class="muted">Increase or decrease the UI text size.</div>
+                            </div>
+                            <div class="font-controls">
+                                <button class="btn btn-small" type="button" id="fontMinus"
+                                    aria-label="Decrease font">A−</button>
+                                <span class="pill" id="fontLabel">MD</span>
+                                <button class="btn btn-small" type="button" id="fontPlus"
+                                    aria-label="Increase font">A+</button>
+                                <button class="btn btn-small" type="button" id="fontReset">Reset</button>
+                            </div>
+                        </div>
+
+                        <div class="settings-row">
+                            <div>
+                                <div class="settings-label">Reduce motion</div>
+                                <div class="muted">Turn off animations for a calmer experience.</div>
+                            </div>
+                            <label class="toggle">
+                                <input id="motionToggle" type="checkbox" />
+                                <span class="toggle-track" aria-hidden="true"></span>
+                            </label>
+                        </div>
+
+                        <form class="settings-row" action="/settings/avatar" method="POST"
+                            enctype="multipart/form-data">
+                            <div>
+                                <div class="settings-label">Profile picture</div>
+                                <div class="muted">Upload a photo from your device for community posts and comments.
+                                </div>
+                                <div
+                                    style="margin-top:0.5rem; display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+                                    <span class="profile-avatar" style="width:40px;height:40px;">
+                                        <% if (user.avatarUrl) { %>
+                                            <img src="<%= user.avatarUrl %>" alt="<%= user.username %>"
+                                                style="width:100%;height:100%;border-radius:999px;object-fit:cover;" />
+                                            <% } else { %>
+                                                <%= (user.username || 'U' ).slice(0, 1).toUpperCase() %>
+                                                    <% } %>
+                                    </span>
+                                    <input type="file" name="avatar" accept="image/*" />
+                                </div>
+                            </div>
+                            <div>
+                                <button class="btn btn-small btn-primary" type="submit">Save picture</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <a href="/logout" class="btn btn-danger">Logout</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function speakUrdu(text) {
+            try {
+                const audio = new Audio(`/api/get-tts-audio?text=${encodeURIComponent(text)}&languageCode=ur-PK`);
+                await audio.play();
+            } catch (error) {
+                console.error('TTS Error:', error);
+                alert('Error playing audio');
+            }
+        }
+    </script>
+    <script src="/js/profile-modal.js"></script>
+</body>
+
+</html>

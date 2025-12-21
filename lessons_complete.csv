@@ -1,0 +1,37 @@
+unit_id,difficulty_level,target_audience,grammar_focus,vocabulary_theme,word_urdu,word_roman,meaning_eng,grammatical_type,gender,root_origin,sentence_urdu,sentence_roman,sentence_english,confusing_forms,distractors
+UNIT_01,beginner,Type A,Basic Letters & Sounds,Everyday Objects,کتاب,kitaab,book,Noun,F,Arabic,میں کتاب پڑھتا ہوں,main kitaab parhta hoon,I read a book,کتابیں|کتابوں,قلم|میز|کرسی
+UNIT_01,beginner,Type A,Basic Letters & Sounds,Everyday Objects,قلم,qalam,pen,Noun,M,Arabic,مجھے ایک قلم چاہیے,mujhe ek qalam chahiye,I need a pen,قلمیں|قلموں,کتاب|کاغذ|پنسل
+UNIT_01,beginner,Type A,Basic Letters & Sounds,Everyday Objects,کاغذ,kaaghaz,paper,Noun,M,Persian,یہ کاغذ سفید ہے,yeh kaaghaz safaid hai,This paper is white,کاغذات|کاغذوں,کتاب|قلم|نوٹ
+UNIT_01,beginner,Type A,Basic Letters & Sounds,Everyday Objects,کرسی,kursi,chair,Noun,F,Persian,کرسی پر بیٹھو,kursi par baitho,Sit on the chair,کرسیاں|کرسیوں,میز|سوفا|بنچ
+UNIT_01,beginner,Type A,Basic Letters & Sounds,Everyday Objects,میز,maiz,table,Noun,F,Persian,میز پر کتاب رکھو,maiz par kitaab rakho,Put the book on the table,میزیں|میزوں,کرسی|الماری|دیوار
+UNIT_01,beginner,Type A,Basic Letters & Sounds,Everyday Objects,بیگ,bag,bag,Noun,M,English,میرا بیگ بھاری ہے,mera bag bhari hai,My bag is heavy,بیگز|بیگوں,جیب|بکس|تھیلا
+UNIT_02,beginner,Type A,Basic Verbs,Daily Actions,کھانا,khaana,to eat,Verb,M,Hindi/Sanskrit,میں کھانا کھاتا ہوں,main khaana khaata hoon,I eat food,کھایا|کھاؤں گا,پینا|دینا|لینا
+UNIT_02,beginner,Type A,Basic Verbs,Daily Actions,پینا,peena,to drink,Verb,M,Hindi/Sanskrit,بچہ پانی پیتا ہے,bacha paani peeta hai,The child drinks water,پیا|پیوں گا,کھانا|دینا|رکھنا
+UNIT_02,beginner,Type A,Basic Verbs,Daily Actions,سونا,sona,to sleep,Verb,M,Hindi/Sanskrit,میں رات کو سوتا ہوں,main raat ko sota hoon,I sleep at night,سویا|سوؤں گا,جاگنا|اٹھنا|بیٹھنا
+UNIT_02,beginner,Type A,Basic Verbs,Daily Actions,پڑھنا,parhna,to read,Verb,M,Hindi/Sanskrit,وہ اخبار پڑھتی ہے,woh akhbar parhti hai,She reads the newspaper,پڑھا|پڑھوں گا,لکھنا|دیکھنا|سننا
+UNIT_02,beginner,Type A,Basic Verbs,Daily Actions,لکھنا,likhna,to write,Verb,M,Hindi/Sanskrit,طالب علم لکھتا ہے,taalib-e-ilm likhta hai,The student writes,لکھا|لکھوں گا,پڑھنا|بولنا|کہنا
+UNIT_03,beginner,Type A,Basic Adjectives,Colors & Descriptions,سرخ,surkh,red,Adjective,M,Persian,یہ سرخ رنگ ہے,yeh surkh rang hai,This is red color,سرخی|سرخوں,نیلا|سبز|پیلا
+UNIT_03,beginner,Type A,Basic Adjectives,Colors & Descriptions,سفید,safaid,white,Adjective,M,Persian,سفید کپڑے صاف ہیں,safaid kapre saaf hain,White clothes are clean,سفیدی|سفیدوں,کالا|بھورا|نیلا
+UNIT_03,beginner,Type A,Basic Adjectives,Colors & Descriptions,بڑا,bara,big,Adjective,M,Hindi/Sanskrit,ہاتھی بڑا جانور ہے,haathi bara janwar hai,The elephant is a big animal,بڑے|بڑی,چھوٹا|لمبا|موٹا
+UNIT_03,beginner,Type A,Basic Adjectives,Colors & Descriptions,چھوٹا,chhota,small,Adjective,M,Hindi/Sanskrit,بلی چھوٹی ہے,billi chhoti hai,The cat is small,چھوٹے|چھوٹی,بڑا|لمبا|پتلا
+UNIT_04,beginner,Type A,Basic Pronouns,Personal Pronouns,میں,main,I,Pronoun,N,Urdu,میں پاکستان سے ہوں,main Pakistan se hoon,I am from Pakistan,مجھے|مجھ کو,تم|آپ|وہ
+UNIT_04,beginner,Type A,Basic Pronouns,Personal Pronouns,تم,tum,you (informal),Pronoun,N,Hindi/Sanskrit,تم کیا کر رہے ہو؟,tum kya kar rahe ho?,What are you doing?,تمہیں|تمہارا,میں|آپ|وہ
+UNIT_04,beginner,Type A,Basic Pronouns,Personal Pronouns,آپ,aap,you (formal),Pronoun,N,Hindi/Sanskrit,آپ کیسے ہیں؟,aap kaise hain?,How are you?,آپ کا|آپ کو,تم|میں|وہ
+UNIT_04,beginner,Type A,Basic Pronouns,Personal Pronouns,وہ,woh,he/she/it,Pronoun,N,Hindi/Sanskrit,وہ اسکول جاتا ہے,woh school jaata hai,He goes to school,اس کا|اس کو,میں|تم|یہ
+UNIT_05,intermediate,Type B,Compound Verbs,Household Activities,کام کرنا,kaam karna,to work,Verb Phrase,M,Compound,میں دفتر میں کام کرتا ہوں,main daftar mein kaam karta hoon,I work in the office,کام کیا|کام کروں گا,پڑھنا|لکھنا|سونا
+UNIT_05,intermediate,Type B,Compound Verbs,Household Activities,صاف کرنا,saaf karna,to clean,Verb Phrase,M,Compound,وہ کمرہ صاف کرتی ہے,woh kamra saaf karti hai,She cleans the room,صاف کیا|صاف کروں گا,دھونا|پونچھنا|مانجھنا
+UNIT_05,intermediate,Type B,Compound Verbs,Household Activities,تیار کرنا,tayyar karna,to prepare,Verb Phrase,M,Compound,ماں کھانا تیار کر رہی ہے,maa khaana tayyar kar rahi hai,Mother is preparing food,تیار کیا|تیار کروں گا,بنانا|پکانا|رکھنا
+UNIT_05,intermediate,Type B,Compound Verbs,Household Activities,دھونا,dhona,to wash,Verb,M,Hindi/Sanskrit,میں کپڑے دھو رہا ہوں,main kapre dho raha hoon,I am washing clothes,دھویا|دھوؤں گا,صاف کرنا|پونچھنا|سکھانا
+UNIT_06,intermediate,Type B,Complex Sentences,Family Relations,رشتہ دار,rishtedaar,relative,Noun,M,Persian,ہمارے رشتہ دار آ رہے ہیں,hamare rishtedaar aa rahe hain,Our relatives are coming,رشتہ داروں|رشتہ داری,خاندان|کنبہ|برادری
+UNIT_06,intermediate,Type B,Complex Sentences,Family Relations,خاندان,khandaan,family,Noun,M,Persian,ہمارا خاندان بہت بڑا ہے,hamara khandaan bohat bara hai,Our family is very big,خاندانی|خاندانوں,رشتہ دار|کنبہ|برادری
+UNIT_06,intermediate,Type B,Complex Sentences,Family Relations,بھائی,bhai,brother,Noun,M,Hindi/Sanskrit,میرا بھائی ڈاکٹر ہے,mera bhai doctor hai,My brother is a doctor,بھائیوں|بھائی چارہ,بہن|بیٹا|بیٹی
+UNIT_06,intermediate,Type B,Complex Sentences,Family Relations,بہن,behen,sister,Noun,F,Hindi/Sanskrit,میری بہن پڑھ رہی ہے,meri behen parh rahi hai,My sister is studying,بہنوں|بہنیں,بھائی|بیٹی|ماں
+UNIT_07,intermediate,Type B,Conditional Tense,Social Situations,اگر,agar,if,Conjunction,N,Persian,اگر بارش ہوئی تو میں نہیں آؤں گا,agar barish hui to main nahi aaoon ga,If it rains then I won't come,اگرچہ|تاکہ,کیونکہ|لیکن|مگر
+UNIT_07,intermediate,Type B,Conditional Tense,Social Situations,شاید,shayad,maybe/perhaps,Adverb,N,Persian,شاید وہ کل آئے,shayad woh kal aaye,Maybe he will come tomorrow,یقینی|ضرور,ہرگز|کبھی نہیں|بالکل
+UNIT_08,advanced,Type C,Literary Expressions,Abstract Concepts,خوابیدہ,khwabida,asleep/dormant,Adjective,M,Persian,اس کی صلاحیتیں خوابیدہ ہیں,us ki salahiyatain khwabida hain,His talents are dormant,خواب|نیند,بیدار|جاگتا|چوکنا
+UNIT_08,advanced,Type C,Literary Expressions,Abstract Concepts,کوشش,koshish,effort/attempt,Noun,F,Arabic,کوشش کرنے والوں کی کبھی ہار نہیں ہوتی,koshish karne walon ki kabhi haar nahi hoti,Those who try never truly lose,محنت|جدوجہد,سستی|کاہلی|ہار
+UNIT_08,advanced,Type C,Literary Expressions,Abstract Concepts,امید,umeed,hope,Noun,F,Arabic,امید پر دنیا قائم ہے,umeed par dunya qaaim hai,The world stands on hope,اُمیدوار|توقع,مایوسی|نااُمیدی|افسوس
+UNIT_09,advanced,Type C,Classical Poetry,Philosophical Terms,استعارہ,istiara,metaphor,Noun,M,Arabic,شاعر نے خوبصورت استعارے استعمال کیے,shair ne khoobsurat istiare istemaal kiye,The poet used beautiful metaphors,استعاراتی|استعارے,علامت|تشبیہ|کنایہ
+UNIT_09,advanced,Type C,Classical Poetry,Philosophical Terms,فلسفہ,falsafa,philosophy,Noun,M,Arabic,اقبال کا فلسفہ خودی کا تصور تھا,Iqbal ka falsafa khudi ka tasawwur tha,Iqbal's philosophy was the concept of self,فلسفی|فلسفیانہ,عقیدہ|نظریہ|خیال
+UNIT_10,advanced,Type C,Formal Writing,Academic Language,تحقیق,tahqeeq,research,Noun,F,Arabic,وہ سائنسی تحقیق کر رہے ہیں,woh sayansi tahqeeq kar rahe hain,They are doing scientific research,تحقیقات|محقق,جانچ|تلاش|تفتیش
+UNIT_10,advanced,Type C,Formal Writing,Academic Language,تجزیہ,tajziya,analysis,Noun,M,Arabic,اس کا تجزیہ بہت گہرا تھا,us ka tajziya bohat gehra tha,His analysis was very deep,تجزیات|تجزیاتی,تبصرہ|جائزہ|رائے

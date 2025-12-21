@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learn Yourself - Urdu Learning</title>
+    <script src="/js/ui-preferences.js"></script>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <h2>🧠 Learn Yourself</h2>
+        <div class="nav-right">
+            <span class="points">🏆 <%= user.totalPoints %> points</span>
+            <span class="rank-badge" data-rank="<%= user.rank || 'Bronze' %>">🏅 <%= user.rank || 'Bronze' %></span>
+            <span class="streak-badge">🔥 <%= (user.practiceStats && user.practiceStats.currentStreak) ? user.practiceStats.currentStreak : 0 %> day streak</span>
+            <a href="/culture" class="btn btn-small">Culture</a>
+            <a href="/context-words" class="btn btn-small">Context Words</a>
+            <a href="/dashboard" class="btn btn-small">Dashboard</a>
+        </div>
+    </nav>
+
+    <div id="tooltip"></div>
+
+    <div class="container">
+        <div class="learn-hero">
+            <div>
+                <h3 style="margin-bottom: 0.35rem;">Translate, explore words, and quiz yourself</h3>
+                <p class="progress-text" style="margin:0;">Paste English text → get Urdu → double‑click any word to see meaning → build a quiz from key words.</p>
+            </div>
+            <div class="learn-hero-actions">
+                <button id="translateBtnTop" class="btn btn-primary">Translate</button>
+            </div>
+        </div>
+
+        <div class="learn-grid">
+            <section class="assessment-section learn-card">
+                <div class="learn-card-header">
+                    <h3 style="margin:0;">English input</h3>
+                    <span class="pill">Tip: upload .txt</span>
+                </div>
+
+                <textarea class="learn-textarea" id="englishInput" placeholder="Type English here (e.g., “I am learning Urdu.”)..."></textarea>
+
+                <div class="learn-toolbar">
+                    <input class="learn-file" id="fileInput" type="file" accept=".txt,text/plain" />
+                    <button id="translateBtn" class="btn btn-primary">Translate</button>
+                </div>
+
+                <div id="translateError" class="error" style="display:none; margin-top: 1rem;"></div>
+            </section>
+
+            <section class="assessment-section learn-card">
+                <div class="learn-card-header">
+                    <h3 style="margin:0;">Urdu output</h3>
+                    <span class="pill">Double‑click word</span>
+                </div>
+
+                <div id="urduOutput" class="learn-output urdu-text" dir="rtl">Your translation will appear here.</div>
+
+                <div class="learn-subsection">
+                    <div class="learn-subtitle">
+                        <strong>Quiz words</strong>
+                        <span class="muted">Selected: <span id="selectedCount">0</span></span>
+                    </div>
+                    <div id="wordChips" class="word-chips"></div>
+                </div>
+
+                <div class="learn-toolbar">
+                    <button id="readAloudBtn" class="btn btn-small">🔊 Read aloud</button>
+                    <button id="makeQuizBtn" class="btn btn-small">📝 Make quiz</button>
+                </div>
+            </section>
+        </div>
+
+        <section class="assessment-section">
+            <div class="learn-card-header">
+                <h3 style="margin:0;">Quiz</h3>
+                <span class="pill">5 questions</span>
+            </div>
+            <p class="instruction">Generate a quick quiz from your translation (or the selected words).</p>
+
+            <div id="quizArea" class="quiz-area"></div>
+            <div id="quizResult" class="result-box"></div>
+        </section>
+    </div>
+
+    <script src="/js/learn-yourself.js"></script>
+    <script>
+        // Convenience: top button triggers the main translate button
+        document.getElementById('translateBtnTop')?.addEventListener('click', () => {
+            document.getElementById('translateBtn')?.click();
+        });
+    </script>
+</body>
+</html>

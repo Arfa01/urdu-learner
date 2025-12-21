@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= story.title %> - Community Post</title>
+  <script src="/js/ui-preferences.js"></script>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <h2>📰 Community Blog</h2>
+    <div class="nav-right">
+      <% if (user) { %>
+        <span class="points">🏆 <%= user.totalPoints %> points</span>
+        <span class="rank-badge" data-rank="<%= user.rank || 'Bronze' %>">🏅 <%= user.rank || 'Bronze' %></span>
+        <span class="streak-badge">🔥 <%= (user.practiceStats && user.practiceStats.currentStreak) ? user.practiceStats.currentStreak : 0 %> day streak</span>
+      <% } %>
+      <a href="/blog" class="btn btn-small">← All posts</a>
+      <a href="/dashboard" class="btn btn-small">Dashboard</a>
+      <a href="/logout" class="btn btn-small">Logout</a>
+    </div>
+  </nav>
+
+  <div class="container">
+      <div class="assessment-section">
+      <div class="content-header">
+        <div style="display:flex; align-items:flex-start; gap:0.75rem;">
+          <span class="profile-avatar" style="width:40px;height:40px;">
+            <% if (story.author && story.author.avatarUrl) { %>
+              <img src="<%= story.author.avatarUrl %>" alt="<%= story.author.username %>" style="width:100%;height:100%;border-radius:999px;object-fit:cover;" />
+            <% } else { %>
+              <%= (story.author && story.author.username ? story.author.username : 'U').slice(0,1).toUpperCase() %>
+            <% } %>
+          </span>
+          <div>
+            <h3 style="margin-bottom:0.35rem;"><%= story.title %></h3>
+            <div class="muted">By <%= story.author && story.author.username ? story.author.username : 'Anonymous' %></div>
+          </div>
+        </div>
+        <div class="content-actions">
+          <button class="btn btn-small" type="button" id="listenPostUrdu">🔊 Listen (Urdu)</button>
+          <% if (story.englishSummary) { %>
+            <button class="btn btn-small" type="button" id="listenPostEnglish">🔊 Listen (English)</button>
+          <% } %>
+          <form method="POST" action="/blog/<%= story._id %>/like" style="display:inline-block;">
+            <button class="btn btn-small" type="submit">
+              <%= story.liked ? '💚 Liked' : '❤️ Like' %> (<%= (story.likes || []).length %>)
+            </button>
+          </form>
+          <form method="POST" action="/blog/<%= story._id %>/save" style="display:inline-block;">
+            <button class="btn btn-small" type="submit">
+              <%= story.saved ? '📌 Saved' : '📎 Save' %> (<%= (story.savedBy || []).length %>)
+            </button>
+          </form>
+          <% if (story.isAuthor) { %>
+            <a href="/blog/<%= story._id %>/edit" class="btn btn-small">✏️ Edit</a>
+            <form method="POST" action="/blog/<%= story._id %>/delete" style="display:inline-block;" onsubmit="return confirm('Delete this story?');">
+              <button type="submit" class="btn btn-small">🗑 Delete</button>
+            </form>
+          <% } %>
+        </div>
+      </div>
+    </div>
+
+    <div class="assessment-section">
+      <div class="split">
+        <div>
+          <h3>Post in Urdu</h3>
+          <div class="reading-box urdu-text" dir="rtl" style="font-size:1.4rem; line-height:2.1;">
+            <%= story.urduText %>
+          </div>
+        </div>
+        <div>
+          <h3>English summary</h3>
+          <div class="reading-box" style="min-height:120px;">
+            <%= story.englishSummary || '—' %>
+          </div>
+          <% if (Array.isArray(story.tags) && story.tags.length > 0) { %>
+            <div class="muted" style="margin-top:0.75rem;">Tags: <%= story.tags.join(', ') %></div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+
+    <div id="comments" class="assessment-section">
+      <div class="split-header" style="margin-bottom:1rem;">
+          <h3 style="margin:0;">Comments (<%= comments.length %>)</h3>
+      </div>
+
+      <form method="POST" action="/blog/<%= story._id %>/comments" class="learn-subsection" style="margin-bottom:1.25rem;">
+        <label for="commentText" class="muted" style="display:block; margin-bottom:0.35rem;">Add your comment</label>
+        <textarea id="commentText" name="text" class="learn-textarea" rows="3" placeholder="Write your thoughts in English or Urdu..."></textarea>
+        <div class="panel-footer" style="justify-content:flex-start; margin-top:0.75rem;">
+          <button type="submit" class="btn btn-primary btn-small">Post comment</button>
+        </div>
+      </form>
+
+      <% if (!comments || comments.length === 0) { %>
+        <div class="muted">No comments yet. Be the first to comment.</div>
+      <% } else { %>
+        <div class="examples">
+          <% comments.forEach((c) => { %>
+            <div class="example" id="comment-<%= c._id %>">
+              <div style="display:flex; gap:0.75rem; align-items:flex-start;">
+                <span class="profile-avatar" style="width:32px;height:32px;">
+                  <% if (c.author && c.author.avatarUrl) { %>
+                    <img src="<%= c.author.avatarUrl %>" alt="<%= c.author.username %>" style="width:100%;height:100%;border-radius:999px;object-fit:cover;" />
+                  <% } else { %>
+                    <%= (c.author && c.author.username ? c.author.username : 'U').slice(0,1).toUpperCase() %>
+                  <% } %>
+                </span>
+                <div style="flex:1;">
+                  <div class="muted" style="margin-bottom:0.25rem; font-weight:800; display:flex; justify-content:space-between; gap:0.5rem;">
+                    <span><%= c.author && c.author.username ? c.author.username : 'User' %></span>
+                    <span style="font-size:0.8rem; opacity:0.8;"><%= new Date(c.createdAt).toLocaleString() %></span>
+                  </div>
+                  <div style="white-space:pre-wrap; line-height:1.7; margin-bottom:0.5rem;">
+                <%= c.text %>
+              </div>
+              <div class="content-actions" style="margin-top:0.25rem;">
+                <form method="POST" action="/blog/<%= story._id %>/comments/<%= c._id %>/like" style="display:inline;">
+                  <button class="btn btn-small" type="submit">
+                    <%= c.liked ? '👍 Liked' : '👍 Like' %> (<%= c.likesCount || 0 %>)
+                  </button>
+                </form>
+                <button class="btn btn-small" type="button" data-reply-toggle="<%= c._id %>">Reply</button>
+                <% if (c.isOwner) { %>
+                  <button class="btn btn-small" type="button" data-edit-toggle="<%= c._id %>">Edit</button>
+                  <form method="POST" action="/blog/<%= story._id %>/comments/<%= c._id %>/delete" style="display:inline;" onsubmit="return confirm('Delete this comment?');">
+                    <button class="btn btn-small" type="submit">Delete</button>
+                  </form>
+                <% } %>
+              </div>
+
+              <div class="learn-subsection" id="reply-form-<%= c._id %>" style="display:none; margin-top:0.5rem;">
+                <form method="POST" action="/blog/<%= story._id %>/comments">
+                  <input type="hidden" name="parentId" value="<%= c._id %>">
+                  <textarea name="text" class="learn-textarea" rows="2" placeholder="Reply in Urdu or English..."></textarea>
+                  <div class="panel-footer" style="justify-content:flex-start; margin-top:0.4rem;">
+                    <button type="submit" class="btn btn-small btn-primary">Reply</button>
+                  </div>
+                </form>
+              </div>
+
+              <% if (c.isOwner) { %>
+                <div class="learn-subsection" id="edit-form-<%= c._id %>" style="display:none; margin-top:0.5rem;">
+                  <form method="POST" action="/blog/<%= story._id %>/comments/<%= c._id %>/edit">
+                    <textarea name="text" class="learn-textarea" rows="2"><%= c.text %></textarea>
+                    <div class="panel-footer" style="justify-content:flex-start; margin-top:0.4rem;">
+                      <button type="submit" class="btn btn-small btn-primary">Save</button>
+                    </div>
+                  </form>
+                </div>
+              <% } %>
+
+              <% if (Array.isArray(c.replies) && c.replies.length > 0) { %>
+                <div style="margin-top:0.75rem; margin-left:1.5rem; border-left:2px solid #e5e7eb; padding-left:0.75rem;">
+                  <% c.replies.forEach(function (r) { %>
+                    <div class="example" id="comment-<%= r._id %>" style="margin-bottom:0.75rem;">
+                      <div style="display:flex; gap:0.75rem; align-items:flex-start;">
+                        <span class="profile-avatar" style="width:28px;height:28px;">
+                          <% if (r.author && r.author.avatarUrl) { %>
+                            <img src="<%= r.author.avatarUrl %>" alt="<%= r.author.username %>" style="width:100%;height:100%;border-radius:999px;object-fit:cover;" />
+                          <% } else { %>
+                            <%= (r.author && r.author.username ? r.author.username : 'U').slice(0,1).toUpperCase() %>
+                          <% } %>
+                        </span>
+                        <div style="flex:1;">
+                          <div class="muted" style="margin-bottom:0.25rem; font-weight:800; display:flex; justify-content:space-between; gap:0.5rem;">
+                            <span><%= r.author && r.author.username ? r.author.username : 'User' %></span>
+                            <span style="font-size:0.8rem; opacity:0.8;"><%= new Date(r.createdAt).toLocaleString() %></span>
+                          </div>
+                          <div style="white-space:pre-wrap; line-height:1.7; margin-bottom:0.5rem;">
+                        <%= r.text %>
+                      </div>
+                      <div class="content-actions" style="margin-top:0.25rem;">
+                        <form method="POST" action="/blog/<%= story._id %>/comments/<%= r._id %>/like" style="display:inline;">
+                          <button class="btn btn-small" type="submit">
+                            <%= r.liked ? '👍 Liked' : '👍 Like' %> (<%= r.likesCount || 0 %>)
+                          </button>
+                        </form>
+                        <button class="btn btn-small" type="button" data-reply-toggle="<%= r._id %>">Reply</button>
+                        <% if (r.isOwner) { %>
+                          <button class="btn btn-small" type="button" data-edit-toggle="<%= r._id %>">Edit</button>
+                          <form method="POST" action="/blog/<%= story._id %>/comments/<%= r._id %>/delete" style="display:inline;" onsubmit="return confirm('Delete this comment?');">
+                            <button class="btn btn-small" type="submit">Delete</button>
+                          </form>
+                        <% } %>
+                      </div>
+
+                      <div class="learn-subsection" id="reply-form-<%= r._id %>" style="display:none; margin-top:0.5rem;">
+                        <form method="POST" action="/blog/<%= story._id %>/comments">
+                          <input type="hidden" name="parentId" value="<%= r._id %>">
+                          <textarea name="text" class="learn-textarea" rows="2" placeholder="Reply in Urdu or English..."></textarea>
+                          <div class="panel-footer" style="justify-content:flex-start; margin-top:0.4rem;">
+                            <button type="submit" class="btn btn-small btn-primary">Reply</button>
+                          </div>
+                        </form>
+                      </div>
+
+                      <% if (r.isOwner) { %>
+                        <div class="learn-subsection" id="edit-form-<%= r._id %>" style="display:none; margin-top:0.5rem;">
+                          <form method="POST" action="/blog/<%= story._id %>/comments/<%= r._id %>/edit">
+                            <textarea name="text" class="learn-textarea" rows="2"><%= r.text %></textarea>
+                            <div class="panel-footer" style="justify-content:flex-start; margin-top:0.4rem;">
+                              <button type="submit" class="btn btn-small btn-primary">Save</button>
+                            </div>
+                          </form>
+                        </div>
+                      <% } %>
+                    </div>
+                  <% }) %>
+                </div>
+              <% } %>
+            </div>
+          <% }) %>
+        </div>
+      <% } %>
+    </div>
+  </div>
+  <script src="/js/tts-player.js"></script>
+  <script>
+    (function () {
+      const storyData = <%- JSON.stringify(story) %>;
+      const listenUr = document.getElementById('listenPostUrdu');
+      const listenEn = document.getElementById('listenPostEnglish');
+
+      if (listenUr && window.ttsPlayer && storyData.urduText) {
+        listenUr.addEventListener('click', async () => {
+          await window.ttsPlayer.playText(storyData.urduText, { languageCode: 'ur-PK' });
+        });
+      }
+
+      if (listenEn && window.ttsPlayer && storyData.englishSummary) {
+        listenEn.addEventListener('click', async () => {
+          await window.ttsPlayer.playText(storyData.englishSummary, { languageCode: 'en' });
+        });
+      }
+
+      // Toggle reply/edit forms for comments
+      document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('[data-reply-toggle]').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            const id = btn.getAttribute('data-reply-toggle');
+            const box = document.getElementById('reply-form-' + id);
+            if (!box) return;
+            box.style.display = (!box.style.display || box.style.display === 'none') ? 'block' : 'none';
+          });
+        });
+
+        document.querySelectorAll('[data-edit-toggle]').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            const id = btn.getAttribute('data-edit-toggle');
+            const box = document.getElementById('edit-form-' + id);
+            if (!box) return;
+            box.style.display = (!box.style.display || box.style.display === 'none') ? 'block' : 'none';
+          });
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

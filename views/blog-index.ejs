@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Community Blog - Urdu Learner</title>
+  <script src="/js/ui-preferences.js"></script>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <h2>📰 Community Blog</h2>
+    <div class="nav-right">
+      <% if (user) { %>
+        <span class="points">🏆 <%= user.totalPoints %> points</span>
+        <span class="rank-badge" data-rank="<%= user.rank || 'Bronze' %>">🏅 <%= user.rank || 'Bronze' %></span>
+        <span class="streak-badge">🔥 <%= (user.practiceStats && user.practiceStats.currentStreak) ? user.practiceStats.currentStreak : 0 %> day streak</span>
+      <% } %>
+      <a href="/dashboard" class="btn btn-small">Dashboard</a>
+      <a href="/culture" class="btn btn-small">Culture</a>
+      <a href="/context-words" class="btn btn-small">Context Words</a>
+      <a href="/logout" class="btn btn-small">Logout</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="progress-summary">
+      <h3>Share posts with the community</h3>
+      <p class="progress-text" style="margin:0;">
+        Post short updates or stories in Urdu, and engage with likes, comments, and saves just like a social feed.
+      </p>
+    </div>
+
+    <div class="assessment-section">
+      <div class="content-header">
+        <h3 style="margin:0;">Community feed</h3>
+        <a href="/blog/new" class="btn btn-primary btn-small">✍️ New post</a>
+      </div>
+
+      <form class="inline-form" method="GET" action="/blog" style="margin-top: 1rem;">
+        <input name="q" value="<%= q %>" placeholder="Search in title, text, or tags..." class="input" />
+        <button class="btn btn-primary" type="submit">Search</button>
+        <a class="btn" href="/blog">Clear</a>
+      </form>
+    </div>
+
+    <div class="grid-cards">
+      <% if (!stories || stories.length === 0) { %>
+        <div class="progress-summary">
+          <h3>No stories yet</h3>
+          <p class="progress-text" style="margin:0;">Be the first to write an Urdu story! Click "Write a new story" above.</p>
+        </div>
+      <% } %>
+
+      <% (stories || []).forEach((s) => { %>
+        <a class="content-card" href="/blog/<%= s._id %>">
+          <div class="content-card-top">
+            <div>
+              <div class="content-card-title"><%= s.title %></div>
+              <div class="content-card-subtitle urdu-text" dir="rtl">
+                <%= (s.urduText || '').slice(0, 120) %><%= (s.urduText || '').length > 120 ? '…' : '' %>
+              </div>
+              <% if (s.englishSummary) { %>
+                <div class="muted" style="margin-top:0.25rem;"><%= (s.englishSummary || '').slice(0, 140) %><%= (s.englishSummary || '').length > 140 ? '…' : '' %></div>
+              <% } %>
+            </div>
+            <div style="text-align:right; min-width:90px;">
+              <div style="display:flex; align-items:center; justify-content:flex-end; gap:0.5rem; margin-bottom:0.25rem;">
+                <% if (s.author && s.author.avatarUrl) { %>
+                  <span class="profile-avatar" style="width:28px;height:28px;">
+                    <img src="<%= s.author.avatarUrl %>" alt="<%= s.author.username %>" style="width:100%;height:100%;border-radius:999px;object-fit:cover;" />
+                  </span>
+                <% } else { %>
+                  <span class="profile-avatar" style="width:28px;height:28px;font-size:0.8rem;">
+                    <%= (s.author && s.author.username ? s.author.username : 'U').slice(0,1).toUpperCase() %>
+                  </span>
+                <% } %>
+                <span class="pill"><%= s.author && s.author.username ? s.author.username : 'Anonymous' %></span>
+              </div>
+              <div class="muted" style="margin-top:0.35rem; font-size:0.85rem;">
+                ❤️ <%= (s.likes || []).length %>
+                • 📌 <%= (s.savedBy || []).length %>
+              </div>
+            </div>
+          </div>
+
+          <div class="content-card-footer">
+            <span class="muted">Open →</span>
+            <% if (Array.isArray(s.tags) && s.tags.length > 0) { %>
+              <span class="muted">Tags: <%= s.tags.slice(0, 3).join(', ') %></span>
+            <% } %>
+          </div>
+        </a>
+      <% }) %>
+    </div>
+  </div>
+</body>
+</html>

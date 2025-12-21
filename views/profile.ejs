@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Your Profile - Urdu Learner</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-left">
+      <a href="/dashboard" class="navbar-brand">Urdu Learner</a>
+    </div>
+    <div class="navbar-right">
+      <a href="/dashboard" class="btn btn-sm">Back to dashboard</a>
+    </div>
+  </nav>
+
+  <main class="container" style="max-width:640px; padding-top:2rem; padding-bottom:3rem;">
+    <h2 style="margin-bottom:1rem;">Your profile</h2>
+
+    <% if (error) { %>
+      <div class="alert alert-error" style="margin-bottom:1rem;"><%= error %></div>
+    <% } %>
+
+    <section class="card" style="margin-bottom:1.5rem;">
+      <div style="display:flex; align-items:center; gap:1rem;">
+        <span class="profile-avatar" style="width:64px;height:64px;">
+          <% if (user && user.avatarUrl) { %>
+            <img src="<%= user.avatarUrl %>" alt="<%= user.username %>" style="width:100%;height:100%;border-radius:999px;object-fit:cover;" />
+          <% } else { %>
+            <%= (user && user.username ? user.username : 'U').slice(0,1).toUpperCase() %>
+          <% } %>
+        </span>
+        <div>
+          <div style="font-weight:600; font-size:1.1rem;"><%= user && user.username ? user.username : 'Learner' %></div>
+          <div class="muted" style="font-size:0.9rem;"><%= user && user.email ? user.email : '' %></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h3 style="margin-bottom:0.75rem;">Profile picture</h3>
+      <p class="muted" style="margin-bottom:0.75rem; font-size:0.9rem;">
+        Paste a link to any image you want to use as your profile picture. This will appear next to your community posts and comments.
+      </p>
+      <form method="POST" action="/profile">
+        <label class="form-label" for="avatarUrl">Avatar image URL</label>
+        <input
+          id="avatarUrl"
+          name="avatarUrl"
+          type="url"
+          class="form-input"
+          placeholder="https://example.com/my-photo.jpg"
+          value="<%= user && user.avatarUrl ? user.avatarUrl : '' %>"
+        />
+        <p class="muted" style="margin-top:0.5rem; font-size:0.85rem;">
+          You can upload an image to any image hosting service (for example Imgur or your own site) and paste the direct image link here.
+        </p>
+        <button type="submit" class="btn btn-primary" style="margin-top:1rem;">
+          Save profile
+        </button>
+      </form>
+    </section>
+  </main>
+</body>
+</html>

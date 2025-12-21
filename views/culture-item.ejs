@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= item.titleEnglish %> - Cultural Corner</title>
+    <script src="/js/ui-preferences.js"></script>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <h2>🕌 Cultural Corner</h2>
+        <div class="nav-right">
+            <span class="points">🏆 <%= user.totalPoints %> points</span>
+            <a href="/culture?type=<%= item.type %>" class="btn btn-small">← Back</a>
+            <a href="/dashboard" class="btn btn-small">Dashboard</a>
+            <a href="/logout" class="btn btn-small">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div id="stageSuccess" class="stage-success" aria-hidden="true"></div>
+        <div class="assessment-section">
+            <div class="content-header">
+                <div>
+                    <h3 style="margin-bottom: 0.25rem;"><%= item.titleEnglish %></h3>
+                    <div class="urdu-text" dir="rtl" style="font-size: 1.8rem;"><%= item.titleUrdu %></div>
+                    <div class="muted" style="margin-top: 0.25rem;">Type: <%= item.type %> • Difficulty: <%= item.difficulty %></div>
+                </div>
+                <div class="content-actions">
+                    <button class="btn btn-small" id="listenUr">🔊 Listen (Urdu)</button>
+                    <button class="btn btn-small" id="listenEn">🔊 Listen (English)</button>
+                    <button class="btn btn-small" id="stopAudio">⏹ Stop</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="assessment-section">
+            <div class="split">
+                <div>
+                    <h3>Urdu</h3>
+                    <div class="reading-box urdu-text" dir="rtl" id="urduText"><%= item.urduText %></div>
+                </div>
+                <div>
+                    <div class="split-header">
+                        <h3>English</h3>
+                        <button class="btn btn-small" id="toggleEnglish">Show/Hide</button>
+                    </div>
+                    <div class="reading-box" id="englishText"><%= item.englishText %></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="assessment-section">
+            <h3>Context & usage</h3>
+            <div class="info-grid">
+                <div class="info-card">
+                    <div class="info-title">When it’s used</div>
+                    <div class="info-body"><%= item.whenToUseEnglish || '—' %></div>
+                </div>
+                <div class="info-card">
+                    <div class="info-title">Cultural context</div>
+                    <div class="info-body"><%= item.contextEnglish || '—' %></div>
+                </div>
+            </div>
+
+            <% if (Array.isArray(item.examples) && item.examples.length > 0) { %>
+                <h3 style="margin-top: 1.5rem;">Examples</h3>
+                <div class="examples">
+                    <% item.examples.forEach((ex) => { %>
+                        <div class="example">
+                            <div class="urdu-text" dir="rtl" style="font-size: 1.4rem;"><%= ex.urdu || '' %></div>
+                            <div class="muted"><%= ex.english || '' %></div>
+                        </div>
+                    <% }) %>
+                </div>
+            <% } %>
+        </div>
+
+        <div class="assessment-section">
+            <h3>Quick interaction</h3>
+            <p class="instruction" style="margin-bottom: 1rem;">
+                Try a mini-quiz to check understanding. (This is reading comprehension, not pronunciation.)
+            </p>
+
+            <div id="quizBox" class="quiz-box"></div>
+        </div>
+    </div>
+
+    <script src="/js/tts-player.js"></script>
+    <script src="/js/game-sfx.js"></script>
+    <script src="/js/xp-ui.js"></script>
+    <script src="/js/practice-api.js"></script>
+    <script src="/js/stage-success.js"></script>
+    <script>
+        const item = <%- JSON.stringify(item) %>;
+
+        const urduTextEl = document.getElementById('urduText');
+        const englishTextEl = document.getElementById('englishText');
+
+        // English toggle
+        const toggleEnglish = document.getElementById('toggleEnglish');
+        if (toggleEnglish && englishTextEl) {
+            toggleEnglish.addEventListener('click', () => {
+                const hidden = englishTextEl.dataset.hidden === '1';
+                englishTextEl.dataset.hidden = hidden ? '0' : '1';
+                englishTextEl.style.display = hidden ? 'block' : 'none';
+            });
+        }
+
+        // Audio buttons
+        const listenUr = document.getElementById('listenUr');
+        const listenEn = document.getElementById('listenEn');
+        const stopAudio = document.getElementById('stopAudio');
+
+        if (listenUr) {
+            listenUr.addEventListener('click', async () => {
+                await window.ttsPlayer.playText(item.urduText, { languageCode: 'ur-PK' });
+            });
+        }
+
+        if (listenEn) {
+            listenEn.addEventListener('click', async () => {
+                await window.ttsPlayer.playText(item.englishText, { languageCode: 'en' });
+            });
+        }
+
+        if (stopAudio) {
+            stopAudio.addEventListener('click', () => window.ttsPlayer.stop());
+        }
+
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        // Render mini MCQ
+        (function renderQuiz() {
+            const box = document.getElementById('quizBox');
+            if (!box) return;
+
+            const q = item.quiz;
+            if (!q || !Array.isArray(q.options) || q.options.length < 2 || typeof q.correctIndex !== 'number') {
+                box.innerHTML = '<div class="muted">No quiz yet for this item (seed data can add one).</div>';
+                return;
+            }
+
+            const optionsHtml = q.options.map((opt, idx) => {
+                const id = `opt_${idx}`;
+                return `
+                    <label class="quiz-option" for="${id}">
+                        <input type="radio" id="${id}" name="mcq" value="${idx}">
+                        ${escapeHtml(opt)}
+                    </label>
+                `;
+            }).join('');
+
+            box.innerHTML = `
+                <div class="quiz-question">${escapeHtml(q.question || 'Choose the best answer:')}</div>
+                <div class="quiz-options">${optionsHtml}</div>
+                <button class="btn btn-primary" id="submitQuiz">Submit</button>
+                <div class="result-box" id="quizResult"></div>
+            `;
+
+            const btn = document.getElementById('submitQuiz');
+            const result = document.getElementById('quizResult');
+
+            btn.addEventListener('click', async () => {
+                if (window.gameSfx) window.gameSfx.click();
+
+                const selected = box.querySelector('input[name="mcq"]:checked');
+                if (!selected) {
+                    result.innerHTML = '<p class="error-text">Please select an answer.</p>';
+                    if (window.gameSfx) window.gameSfx.wrong();
+                    if (window.xpUi) window.xpUi.toast('Pick an option first!', 'warn');
+                    return;
+                }
+
+                const picked = Number(selected.value);
+                const correct = picked === q.correctIndex;
+                const color = correct ? '#10b981' : '#ef4444';
+
+                // Add a bit of game feel
+                box.classList.remove('shake');
+                if (!correct) {
+                    box.classList.add('shake');
+                    setTimeout(() => box.classList.remove('shake'), 420);
+                }
+
+                result.innerHTML = `
+                    <div style="padding: 15px; background: ${color}20; border: 2px solid ${color}; border-radius: 12px;">
+                        <h4 style="color: ${color}; margin: 0 0 0.5rem 0;">${correct ? 'Correct' : 'Not quite'}</h4>
+                        ${q.explanation ? `<div>${escapeHtml(q.explanation)}</div>` : ''}
+                    </div>
+                `;
+
+                if (window.gameSfx) (correct ? window.gameSfx.correct() : window.gameSfx.wrong());
+
+                try {
+                    const resp = await window.practiceApi.submitCultureQuiz(item._id, correct);
+                    if (resp && resp.success) {
+                        if (resp.pointsAwarded > 0) {
+                            if (window.xpUi) window.xpUi.toast(`+${resp.pointsAwarded} XP`, 'success');
+                            if (window.xpUi) window.xpUi.updatePointsBadge(resp.totalPoints);
+                            if (window.xpUi) window.xpUi.updateRankBadge(resp.rank);
+                            if (window.xpUi) window.xpUi.updateStreakBadge(resp.streak?.current);
+                            if (window.gameSfx && resp.pointsAwarded >= 30) window.gameSfx.levelUp();
+                        } else {
+                            if (correct && window.xpUi) window.xpUi.toast('Correct (already completed)', 'success');
+                            if (!correct && window.xpUi) window.xpUi.toast('Try again.', 'warn');
+                        }
+                    }
+                } catch (e) {
+                    // Non-blocking: quiz still works even if points endpoint fails
+                    console.warn('Practice submit failed:', e);
+                }
+
+                // Big celebration on a perfect clear (single-question game)
+                if (correct && window.stageSuccess) {
+                    window.stageSuccess.show({
+                        title: 'Stage Clear',
+                        subtitle: `Culture challenge: ${item.titleEnglish}`,
+                        stars: 3,
+                        primaryLabel: 'Back to list',
+                        primaryHref: `/culture?type=${encodeURIComponent(item.type)}`,
+                        secondaryLabel: 'Dashboard',
+                        secondaryHref: '/dashboard'
+                    });
+                }
+            });
+        })();
+    </script>
+</body>
+
+</html>

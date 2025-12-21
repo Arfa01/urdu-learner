@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Culture - Urdu Learning</title>
+    <script src="/js/ui-preferences.js"></script>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <h2>🕌 Cultural Corner</h2>
+        <div class="nav-right">
+            <span class="points">🏆 <%= user.totalPoints %> points</span>
+            <span class="rank-badge" data-rank="<%= user.rank || 'Bronze' %>">🏅 <%= user.rank || 'Bronze' %></span>
+            <span class="streak-badge">🔥 <%= (user.practiceStats && user.practiceStats.currentStreak) ? user.practiceStats.currentStreak : 0 %> day streak</span>
+            <a href="/dashboard" class="btn btn-small">Dashboard</a>
+            <a href="/context-words" class="btn btn-small">Context Words</a>
+            <a href="/logout" class="btn btn-small">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="progress-summary">
+            <h3>Read stories, folk tales, and idioms</h3>
+            <p class="progress-text" style="margin: 0;">
+                Open any item to see the English translation, usage context, and listen with Urdu/English TTS.
+            </p>
+        </div>
+
+        <div class="assessment-section">
+            <div class="tabs">
+                <a class="tab <%= currentType === 'idiom' ? 'active' : '' %>" href="/culture?type=idiom">Idioms</a>
+                <a class="tab <%= currentType === 'story' ? 'active' : '' %>" href="/culture?type=story">Stories</a>
+                <a class="tab <%= currentType === 'folktale' ? 'active' : '' %>" href="/culture?type=folktale">Folk Tales</a>
+            </div>
+
+            <form class="inline-form" method="GET" action="/culture" style="margin-top: 1rem;">
+                <input type="hidden" name="type" value="<%= currentType %>" />
+                <input name="q" value="<%= q %>" placeholder="Search by title or tag..." class="input" />
+                <button class="btn btn-primary" type="submit">Search</button>
+                <a class="btn" href="/culture?type=<%= currentType %>">Clear</a>
+            </form>
+        </div>
+
+        <div class="grid-cards">
+            <% if (!items || items.length === 0) { %>
+                <div class="progress-summary">
+                    <h3>No items found</h3>
+                    <p class="progress-text" style="margin:0;">Run the new seed script to add starter content (details below).</p>
+                </div>
+            <% } %>
+
+            <% (items || []).forEach((it) => { %>
+                <a class="content-card" href="/culture/<%= it._id %>">
+                    <div class="content-card-top">
+                        <div>
+                            <div class="content-card-title"><%= it.titleEnglish %></div>
+                            <div class="content-card-subtitle urdu-text" dir="rtl"><%= it.titleUrdu %></div>
+                        </div>
+                        <span class="pill"><%= it.difficulty %></span>
+                    </div>
+
+                    <div class="content-card-body">
+                        <div class="muted">Preview (Urdu)</div>
+                        <div class="urdu-text" dir="rtl" style="font-size: 1.2rem; line-height: 1.9;">
+                            <%= (it.urduText || '').slice(0, 120) %><%= (it.urduText || '').length > 120 ? '…' : '' %>
+                        </div>
+                    </div>
+
+                    <div class="content-card-footer">
+                        <span class="muted">Open →</span>
+                        <% if (Array.isArray(it.tags) && it.tags.length > 0) { %>
+                            <span class="muted">Tags: <%= it.tags.slice(0, 3).join(', ') %></span>
+                        <% } %>
+                    </div>
+                </a>
+            <% }) %>
+        </div>
+
+        <div class="progress-summary" style="margin-top: 2rem;">
+            <h3>About this section</h3>
+            <p class="progress-text" style="margin:0;">
+                This area shows cultural items (idioms, stories, folk tales) when content is available.
+            </p>
+        </div>
+    </div>
+</body>
+
+</html>

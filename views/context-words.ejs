@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Context Words - Urdu Learning</title>
+    <script src="/js/ui-preferences.js"></script>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <h2>🧩 Context Words</h2>
+        <div class="nav-right">
+            <span class="points">🏆 <%= user.totalPoints %> points</span>
+            <span class="rank-badge" data-rank="<%= user.rank || 'Bronze' %>">🏅 <%= user.rank || 'Bronze' %></span>
+            <span class="streak-badge">🔥 <%= (user.practiceStats && user.practiceStats.currentStreak) ? user.practiceStats.currentStreak : 0 %> day streak</span>
+            <a href="/dashboard" class="btn btn-small">Dashboard</a>
+            <a href="/culture" class="btn btn-small">Cultural Corner</a>
+            <a href="/logout" class="btn btn-small">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="progress-summary">
+            <h3>Same word, different meaning</h3>
+            <p class="progress-text" style="margin: 0;">Learn how one Urdu word can change meaning depending on context and situation.</p>
+        </div>
+
+        <div class="assessment-section">
+            <form class="inline-form" method="GET" action="/context-words">
+                <input name="q" value="<%= q %>" placeholder="Search a word..." class="input" />
+                <button class="btn btn-primary" type="submit">Search</button>
+                <a class="btn" href="/context-words">Clear</a>
+            </form>
+        </div>
+
+        <div class="grid-cards">
+            <% if (!items || items.length === 0) { %>
+                <div class="progress-summary">
+                    <h3>No items found</h3>
+                    <p class="progress-text" style="margin:0;">Context word entries will appear here once content is added.</p>
+                </div>
+            <% } %>
+
+            <% (items || []).forEach((w) => { %>
+                <a class="content-card" href="/context-words/<%= w._id %>">
+                    <div class="content-card-top">
+                        <div>
+                            <div class="content-card-title"><%= w.wordUrdu %></div>
+                            <div class="muted"><%= w.romanUrdu || '' %> <%= w.baseEnglish ? ('• ' + w.baseEnglish) : '' %></div>
+                        </div>
+                        <span class="pill"><%= (w.senses || []).length %> senses</span>
+                    </div>
+                    <div class="content-card-body">
+                        <div class="muted">Tap to see meanings + examples + practice.</div>
+                    </div>
+                </a>
+            <% }) %>
+        </div>
+
+    </div>
+</body>
+
+</html>

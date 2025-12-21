@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson <%= level.levelNumber %> - Urdu Learning</title>
+    <script src="/js/ui-preferences.js"></script>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <nav class="navbar lesson-navbar">
+        <button class="icon-btn" id="stepPrev" type="button" aria-label="Previous assessment" title="Previous assessment">
+            <!-- left arrow -->
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 19.5 8 12l7.5-7.5"/></svg>
+        </button>
+
+        <div class="lesson-nav-title">
+            <div class="lesson-nav-kicker">Lesson <%= level.levelNumber %></div>
+            <div class="lesson-nav-main"><%= level.title %></div>
+            <div class="lesson-nav-links">
+                <a href="/dashboard" class="mini-link">Dashboard</a>
+                <span class="muted">•</span>
+                <a href="/lessons" class="mini-link">All Lessons</a>
+            </div>
+        </div>
+
+        <button class="icon-btn" id="stepNext" type="button" aria-label="Next assessment" title="Next assessment">
+            <!-- right arrow -->
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 4.5 16 12l-7.5 7.5"/></svg>
+        </button>
+    </nav>
+
+    <div class="container">
+        <div class="lesson-progress">
+            <div class="stepper" id="stepper">
+                <button class="step" data-step="words" type="button">Words</button>
+                <button class="step" data-step="sentences" type="button">Sentences</button>
+                <button class="step" data-step="passage" type="button">Passage</button>
+                <button class="step" data-step="mcq" type="button">Quiz</button>
+            </div>
+        </div>
+
+        <div class="assessment-section" style="margin-top: 1.25rem;">
+            <div class="content-header">
+                <div>
+                    <h3 style="margin-bottom: 0.25rem;">Lesson overview</h3>
+                    <div class="muted">Unit: <%= level.unitId || ('UNIT_' + String(level.levelNumber).padStart(2, '0')) %><%= level.isPlaceholder ? ' • placeholder content' : '' %></div>
+                </div>
+                <span class="pill" style="text-transform: capitalize;"><%= (level.difficultyLevel || '').trim() || (level.levelNumber <= 10 ? 'beginner' : level.levelNumber <= 30 ? 'intermediate' : 'advanced') %></span>
+            </div>
+
+            <div class="info-grid" style="margin-top: 1rem;">
+                <div class="info-card">
+                    <div class="info-title">Vocabulary theme</div>
+                    <div class="info-body"><%= level.vocabularyTheme || '—' %></div>
+                </div>
+                <div class="info-card">
+                    <div class="info-title">Grammar focus</div>
+                    <div class="info-body"><%= level.grammarFocus || '—' %></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="lessonPanels">
+            <!-- Assessment 1: Words Practice -->
+            <section class="assessment-section assessment-panel" data-step="words">
+                <h3>📝 Words</h3>
+                <p class="instruction">Listen to each word and record your pronunciation.</p>
+
+                <div class="words-list">
+                    <% level.words.forEach((word, idx)=> { %>
+                        <div class="word-item">
+                            <div class="word-content">
+                                <h4 class="urdu-text"><%= word.urdu %></h4>
+                                <p class="english-text"><%= word.english %></p>
+                                <% if (word.romanUrdu) { %>
+                                    <p class="roman-text">(<%= word.romanUrdu %>)</p>
+                                <% } %>
+                            </div>
+                            <div class="word-actions">
+                                <button onclick="speakUrdu('<%= word.urdu %>')" class="btn btn-icon" aria-label="Listen">🔊</button>
+                                <button onclick="recordWord('<%= word.urdu %>', <%= idx %>)" class="btn btn-small record-btn" id="word-btn-<%= idx %>">🎤 Record</button>
+                            </div>
+                            <div id="word-result-<%= idx %>" class="result-box"></div>
+                        </div>
+                    <% }) %>
+                </div>
+
+                <div class="score-display" id="words-score">Words Score: <%= userScores.words || 0 %>%</div>
+
+                <div class="panel-footer">
+                    <button class="btn" type="button" data-skip>Skip</button>
+                    <button class="btn btn-primary" type="button" data-next>Next →</button>
+                </div>
+            </section>
+
+            <!-- Assessment 2: Sentences Practice -->
+            <section class="assessment-section assessment-panel" data-step="sentences">
+                <h3>📖 Sentences</h3>
+                <p class="instruction">Listen to sentences and practice pronunciation.</p>
+
+                <div class="sentences-list">
+                    <% level.sentences.forEach((sentence, idx)=> { %>
+                        <div class="sentence-item">
+                            <div class="sentence-content">
+                                <p class="urdu-text"><%= sentence.urdu %></p>
+                                <p class="english-text"><%= sentence.englishTranslation %></p>
+                            </div>
+                            <div class="sentence-actions">
+                                <button onclick="speakUrdu('<%= sentence.urdu %>')" class="btn btn-small">🔊 Listen</button>
+                                <button onclick="recordSentence('<%= sentence.urdu %>', <%= idx %>)" class="btn btn-small record-btn" id="sentence-btn-<%= idx %>">🎤 Record</button>
+                            </div>
+                            <div id="sentence-result-<%= idx %>" class="result-box"></div>
+                        </div>
+                    <% }) %>
+                </div>
+
+                <div class="score-display" id="sentences-score">Sentences Score: <%= userScores.sentences || 0 %>%</div>
+
+                <div class="panel-footer">
+                    <button class="btn" type="button" data-skip>Skip</button>
+                    <button class="btn btn-primary" type="button" data-next>Next →</button>
+                </div>
+            </section>
+
+            <!-- Assessment 3: Passage Practice -->
+            <section class="assessment-section assessment-panel" data-step="passage">
+                <h3>📰 Passage</h3>
+                <p class="instruction">Listen to the complete passage and read it aloud.</p>
+
+                <div class="passage-container">
+                    <div class="passage-text">
+                        <p class="urdu-text large"><%= level.passage.urdu %></p>
+                        <p class="english-text"><%= level.passage.englishTranslation %></p>
+                    </div>
+                    <div class="passage-actions">
+                        <button onclick="speakUrdu('<%= level.passage.urdu %>')" class="btn btn-primary">🔊 Listen</button>
+                        <button onclick="recordPassage('<%= level.passage.urdu %>')" class="btn btn-primary record-btn" id="passage-btn">🎤 Read Aloud</button>
+                    </div>
+                    <div id="passage-result" class="result-box"></div>
+                </div>
+
+                <div class="score-display" id="passage-score">Passage Score: <%= userScores.passage || 0 %>%</div>
+
+                <div class="panel-footer">
+                    <button class="btn" type="button" data-skip>Skip</button>
+                    <button class="btn btn-primary" type="button" data-next>Next →</button>
+                </div>
+            </section>
+
+            <!-- Assessment 4: MCQ Quiz -->
+            <section class="assessment-section assessment-panel" data-step="mcq">
+                <h3>🎯 Multiple Choice Quiz</h3>
+                <p class="instruction">Test your knowledge of the words.</p>
+
+                <div id="mcq-quiz">
+                    <% level.words.slice(0, 5).forEach((word, idx)=> { %>
+                        <div class="question">
+                            <p><strong>Q<%= idx + 1 %>:</strong> What is the meaning of "<%= word.urdu %>"?</p>
+                            <% const options=[word.english]; level.words.filter(w=> w.english !== word.english).slice(0,3).forEach(w => options.push(w.english)); options.sort(() => Math.random() - 0.5); %>
+                            <% options.forEach((opt)=> { %>
+                                <label>
+                                    <input type="radio" name="q<%= idx %>" value="<%= opt %>" data-correct="<%= word.english %>">
+                                    <%= opt %>
+                                </label>
+                            <% }) %>
+                        </div>
+                    <% }) %>
+                </div>
+
+                <button onclick="submitMCQ()" class="btn btn-primary">Submit Quiz</button>
+                <div id="mcq-result" class="result-box"></div>
+                <div class="score-display" id="mcq-score">MCQ Score: <%= userScores.mcq || 0 %>%</div>
+
+                <div class="panel-footer">
+                    <a class="btn" href="/dashboard">Finish</a>
+                    <button class="btn btn-primary" type="button" data-finish>Show Results</button>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Stage success overlay -->
+    <div id="stageSuccess" class="stage-success" aria-hidden="true"></div>
+
+    <script>
+        const levelNumber = <%= level.levelNumber %>;
+        const initialUserScores = <%- JSON.stringify(userScores || {}) %>;
+        let currentRecorder;
+        let audioChunks = [];
+    </script>
+    <script src="/js/urdu-similarity.js"></script>
+    <script src="/js/game-sfx.js"></script>
+    <script src="/js/xp-ui.js"></script>
+    <script src="/js/lesson-assessment.js"></script>
+    <script src="/js/stage-success.js"></script>
+    <script src="/js/lesson-flow.js"></script>
+</body>
+
+</html>

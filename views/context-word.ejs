@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= item.wordUrdu %> - Context Words</title>
+    <script src="/js/ui-preferences.js"></script>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <h2>🧩 Context Words</h2>
+        <div class="nav-right">
+            <span class="points">🏆 <%= user.totalPoints %> points</span>
+            <a href="/context-words" class="btn btn-small">← Back</a>
+            <a href="/dashboard" class="btn btn-small">Dashboard</a>
+            <a href="/logout" class="btn btn-small">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="assessment-section">
+            <div class="content-header">
+                <div>
+                    <h3 style="margin-bottom: 0.25rem;">Word: <span class="urdu-text" dir="rtl"><%= item.wordUrdu %></span></h3>
+                    <div class="muted"><%= item.romanUrdu || '' %> <%= item.baseEnglish ? ('• ' + item.baseEnglish) : '' %></div>
+                </div>
+                <div class="content-actions">
+                    <button class="btn btn-small" id="listenWord">🔊 Listen</button>
+                    <button class="btn btn-small" id="stopAudio">⏹ Stop</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="assessment-section">
+            <h3>Meanings (senses)</h3>
+            <p class="instruction">Click a sense to focus it. Use the practice quiz below.</p>
+
+            <div class="sense-list" id="senseList"></div>
+            <div class="reading-box" id="senseDetail"></div>
+        </div>
+
+        <div class="assessment-section">
+            <h3>Practice</h3>
+            <p class="instruction">Choose how you want to practice: meaning in a sentence, or situation/register (formal vs informal, literal vs idiomatic).</p>
+
+            <div class="tabs" style="margin-top: 0.75rem;">
+                <button class="tab active" type="button" id="tabMeaning">Meaning (sentence)</button>
+                <button class="tab" type="button" id="tabScenario">Situation / usage</button>
+                <button class="tab" type="button" id="tabDuel">Politeness Duel</button>
+            </div>
+
+            <div id="practiceBox" class="quiz-box" style="margin-top: 1rem;"></div>
+        </div>
+    </div>
+
+    <script src="/js/tts-player.js"></script>
+    <script src="/js/game-sfx.js"></script>
+    <script src="/js/xp-ui.js"></script>
+    <script src="/js/practice-api.js"></script>
+    <script>
+        const item = <%- JSON.stringify(item) %>;
+
+        const listenWord = document.getElementById('listenWord');
+        const stopAudio = document.getElementById('stopAudio');
+
+        if (listenWord) {
+            listenWord.addEventListener('click', async () => {
+                await window.ttsPlayer.playText(item.wordUrdu, { languageCode: 'ur-PK', maxLen: 120 });
+            });
+        }
+
+        if (stopAudio) {
+            stopAudio.addEventListener('click', () => window.ttsPlayer.stop());
+        }
+
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function pill(text) {
+            if (!text) return '';
+            return `<span class=\"pill\" style=\"background:#e8f5e9; color:#0f9d58;\">${escapeHtml(text)}</span>`;
+        }
+
+        function renderSenseDetail(idx) {
+            const d = document.getElementById('senseDetail');
+            const s = (item.senses || [])[idx];
+            if (!d || !s) return;
+
+            const usageLine = `
+                <div style=\"display:flex; gap:0.5rem; flex-wrap:wrap; margin-top:0.5rem;\">
+                    ${pill(`usage: ${s.usageType || 'literal'}`)}
+                    ${pill(`register: ${s.register || 'neutral'}`)}
+                    ${pill(`tone: ${s.tone || 'neutral'}`)}
+                </div>
+            `;
+
+            d.innerHTML = `
+                <div style="display:flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
+                    <div>
+                        <div style="font-weight: 800; font-size: 1.05rem;">${escapeHtml(s.labelEnglish)}</div>
+                        <div class="muted">${escapeHtml(s.meaningEnglish)}</div>
+                        ${usageLine}
+                    </div>
+                    <button class="btn btn-small" id="listenExample">🔊 Listen example</button>
+                </div>
+
+                <div style="margin-top: 1rem;">
+                    <div class="muted">Example (Urdu)</div>
+                    <div class="urdu-text" dir="rtl" style="font-size: 1.5rem; line-height: 2;">${escapeHtml(s.exampleUrdu)}</div>
+                </div>
+
+                <div style="margin-top: 0.75rem;">
+                    <div class="muted">Example (English)</div>
+                    <div>${escapeHtml(s.exampleEnglish)}</div>
+                </div>
+
+                <div style="margin-top: 0.75rem;">
+                    <div class="muted">Meaning context</div>
+                    <div>${escapeHtml(s.contextEnglish || '—')}</div>
+                </div>
+
+                <div style="margin-top: 0.75rem;">
+                    <div class="muted">Usage notes</div>
+                    <div>${escapeHtml(s.usageNotesEnglish || '—')}</div>
+                </div>
+
+                <div style="margin-top: 0.75rem;">
+                    <div class="muted">Tips</div>
+                    <div>${escapeHtml(s.tipsEnglish || '—')}</div>
+                </div>
+            `;
+
+            const btn = document.getElementById('listenExample');
+            if (btn) {
+                btn.addEventListener('click', async () => {
+                    await window.ttsPlayer.playText(s.exampleUrdu, { languageCode: 'ur-PK' });
+                });
+            }
+        }
+
+        function renderSenseList(activeIdx) {
+            const el = document.getElementById('senseList');
+            if (!el) return;
+
+            el.innerHTML = (item.senses || []).map((s, idx) => {
+                const active = idx === activeIdx ? 'active' : '';
+                return `
+                    <button type="button" class="sense-chip ${active}" data-idx="${idx}">
+                        ${escapeHtml(s.labelEnglish)}
+                    </button>
+                `;
+            }).join('');
+
+            el.querySelectorAll('.sense-chip').forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    const idx = Number(btn.dataset.idx);
+                    renderSenseList(idx);
+                    renderSenseDetail(idx);
+                    currentSenseIdx = idx;
+                    if (document.getElementById('tabScenario')?.classList.contains('active')) {
+                        renderScenarioPractice();
+                    } else {
+                        renderMeaningPractice(idx);
+                    }
+                });
+            });
+        }
+
+        function setActiveTab(which) {
+            const tabMeaning = document.getElementById('tabMeaning');
+            const tabScenario = document.getElementById('tabScenario');
+            if (!tabMeaning || !tabScenario) return;
+
+            if (which === 'scenario') {
+                tabMeaning.classList.remove('active');
+                tabScenario.classList.add('active');
+            } else {
+                tabScenario.classList.remove('active');
+                tabMeaning.classList.add('active');
+            }
+        }
+
+        async function submitPractice(mode, correct) {
+            try {
+                const resp = await window.practiceApi.submitContextPractice(item._id, mode, correct);
+                if (resp && resp.success) {
+                    if (resp.pointsAwarded > 0) {
+                        if (window.xpUi) window.xpUi.toast(`+${resp.pointsAwarded} XP!`, 'success');
+                        if (window.xpUi) window.xpUi.updatePointsBadge(resp.totalPoints);
+                        if (window.gameSfx && resp.pointsAwarded >= 30) window.gameSfx.levelUp();
+                    } else {
+                        if (correct && window.xpUi) window.xpUi.toast('Correct! (already completed — no extra XP)', 'success');
+                    }
+                }
+            } catch (e) {
+                console.warn('Practice submit failed:', e);
+            }
+        }
+
+        function scoreRegister(register) {
+            if (register === 'formal') return 2;
+            if (register === 'neutral') return 1;
+            if (register === 'informal') return 0;
+            return 1;
+        }
+
+        function scoreTone(tone) {
+            if (tone === 'polite') return 2;
+            if (tone === 'neutral') return 1;
+            if (tone === 'rude') return 0;
+            return 1;
+        }
+
+        function scoreUsageType(usageType) {
+            // Not "better", but helps for variety prompts
+            if (usageType === 'idiomatic') return 2;
+            if (usageType === 'figurative') return 1;
+            if (usageType === 'literal') return 0;
+            if (usageType === 'slang') return 0;
+            return 0;
+        }
+
+        function pickDuelPair() {
+            const senses = Array.isArray(item.senses) ? item.senses : [];
+            if (senses.length < 2) return null;
+
+            // Try to find a pair with different register/tone so duel is meaningful
+            for (let tries = 0; tries < 30; tries++) {
+                const a = Math.floor(Math.random() * senses.length);
+                let b = Math.floor(Math.random() * senses.length);
+                if (b === a) b = (b + 1) % senses.length;
+
+                const sa = senses[a];
+                const sb = senses[b];
+
+                const ra = scoreRegister(sa.register);
+                const rb = scoreRegister(sb.register);
+                const ta = scoreTone(sa.tone);
+                const tb = scoreTone(sb.tone);
+
+                if (ra !== rb || ta !== tb) {
+                    return { a, b };
+                }
+            }
+
+            // Fallback: any pair
+            return { a: 0, b: 1 };
+        }
+
+        function pickDuelPrompt(sa, sb) {
+            const ra = scoreRegister(sa.register);
+            const rb = scoreRegister(sb.register);
+            const ta = scoreTone(sa.tone);
+            const tb = scoreTone(sb.tone);
+
+            // Determine which is "more polite/formal" overall
+            const pa = ra + ta;
+            const pb = rb + tb;
+
+            const wantMorePolite = Math.random() < 0.5;
+
+            if (wantMorePolite) {
+                return {
+                    question: 'Which sentence is more polite/formal (best for teacher/elder)?',
+                    correct: pa === pb ? null : (pa > pb ? 'a' : 'b')
+                };
+            }
+
+            return {
+                question: 'Which sentence sounds more casual/informal (best for close friends)?',
+                correct: pa === pb ? null : (pa < pb ? 'a' : 'b')
+            };
+        }
+
+        function renderMeaningPractice(correctIdx) {
+            const box = document.getElementById('practiceBox');
+            if (!box) return;
+
+            const s = (item.senses || [])[correctIdx];
+            const options = (item.senses || []).map((x) => x.labelEnglish);
+
+            const shuffled = options
+                .map((v, i) => ({ v, i }))
+                .sort(() => Math.random() - 0.5);
+
+            const correctLabel = s ? s.labelEnglish : '';
+
+            box.innerHTML = `
+                <div class="quiz-question">Meaning quiz</div>
+                <div class="muted" style="margin-bottom: 0.6rem;">Pick the correct meaning for this sentence.</div>
+                <div class="urdu-text" dir="rtl" style="margin: 0.6rem 0 1rem; font-size: 1.5rem; line-height: 2;">
+                    ${escapeHtml(s ? s.exampleUrdu : '')}
+                </div>
+                <div class="quiz-options">
+                    ${shuffled.map(({ v }, idx) => {
+                        const id = `m_${idx}`;
+                        return `
+                            <label class="quiz-option" for="${id}">
+                                <input id="${id}" type="radio" name="practice" value="${escapeHtml(v)}">
+                                ${escapeHtml(v)}
+                            </label>
+                        `;
+                    }).join('')}
+                </div>
+                <button class="btn btn-primary" id="submitPractice">Submit</button>
+                <div class="result-box" id="practiceResult"></div>
+            `;
+
+            const submit = document.getElementById('submitPractice');
+            const result = document.getElementById('practiceResult');
+            submit.addEventListener('click', async () => {
+                if (window.gameSfx) window.gameSfx.click();
+                const selected = box.querySelector('input[name="practice"]:checked');
+                if (!selected) {
+                    result.innerHTML = '<p class="error-text">Pick one option.</p>';
+                    return;
+                }
+                const picked = selected.value;
+                const correct = picked === correctLabel;
+                const color = correct ? '#10b981' : '#ef4444';
+                result.innerHTML = `
+                    <div style="padding: 15px; background: ${color}20; border: 2px solid ${color}; border-radius: 12px;">
+                        <h4 style="color: ${color}; margin: 0;">${correct ? '✅ Correct' : '❌ Not quite'}</h4>
+                        <div class="muted" style="margin-top: 0.4rem;">Correct: ${escapeHtml(correctLabel)}</div>
+                    </div>
+                `;
+
+                if (window.gameSfx) (correct ? window.gameSfx.correct() : window.gameSfx.wrong());
+                await submitPractice('meaning', correct);
+            });
+        }
+
+        function pickScenario() {
+            const list = Array.isArray(item.scenarios) ? item.scenarios : [];
+            if (list.length > 0) {
+                return list[Math.floor(Math.random() * list.length)];
+            }
+
+            // Fallback: generate a simple scenario from sense contexts
+            const senses = Array.isArray(item.senses) ? item.senses : [];
+            if (senses.length === 0) return null;
+
+            const idx = Math.floor(Math.random() * senses.length);
+            const s = senses[idx];
+            return {
+                promptEnglish: s.contextEnglish || 'Choose the best meaning for the situation.',
+                promptUrdu: '',
+                correctSenseIndex: idx,
+                explanationEnglish: s.usageNotesEnglish || s.tipsEnglish || ''
+            };
+        }
+
+        function renderScenarioPractice() {
+            const box = document.getElementById('practiceBox');
+            if (!box) return;
+
+            const scenario = pickScenario();
+            if (!scenario) {
+                box.innerHTML = '<div class="muted">No scenarios available for this word yet.</div>';
+                return;
+            }
+
+            const senses = Array.isArray(item.senses) ? item.senses : [];
+            const options = senses.map((s, i) => ({
+                label: s.labelEnglish,
+                i,
+                meta: `${s.usageType || 'literal'} • ${s.register || 'neutral'} • ${s.tone || 'neutral'}`
+            })).sort(() => Math.random() - 0.5);
+
+            box.innerHTML = `
+                <div class="quiz-question">Situation / usage quiz</div>
+                <div class="muted" style="margin-bottom: 0.6rem;">Pick the best sense for the situation (formal vs informal, literal vs idiomatic).</div>
+                <div style="background:#fff; border:2px solid #e0e0e0; border-radius:12px; padding: 1rem;">
+                    <div style="font-weight:800; margin-bottom:0.35rem;">Situation</div>
+                    <div>${escapeHtml(scenario.promptEnglish || '')}</div>
+                    ${scenario.promptUrdu ? `<div class="urdu-text" dir="rtl" style="margin-top:0.6rem; font-size:1.3rem;">${escapeHtml(scenario.promptUrdu)}</div>` : ''}
+                </div>
+
+                <div class="quiz-options" style="margin-top: 1rem;">
+                    ${options.map((o, idx) => {
+                        const id = `s_${idx}`;
+                        return `
+                            <label class="quiz-option" for="${id}">
+                                <input id="${id}" type="radio" name="scenario" value="${o.i}">
+                                <div>
+                                    <div style="font-weight:800;">${escapeHtml(o.label)}</div>
+                                    <div class="muted">${escapeHtml(o.meta)}</div>
+                                </div>
+                            </label>
+                        `;
+                    }).join('')}
+                </div>
+
+                <div style="display:flex; gap:0.75rem; flex-wrap:wrap; align-items:center;">
+                    <button class="btn btn-primary" id="submitScenario">Submit</button>
+                    <button class="btn" id="nextScenario" type="button">Next scenario</button>
+                </div>
+
+                <div class="result-box" id="scenarioResult"></div>
+            `;
+
+            const submit = document.getElementById('submitScenario');
+            const next = document.getElementById('nextScenario');
+            const result = document.getElementById('scenarioResult');
+
+            if (next) {
+                next.addEventListener('click', () => {
+                    if (window.gameSfx) window.gameSfx.click();
+                    renderScenarioPractice();
+                });
+            }
+
+            if (submit) {
+                submit.addEventListener('click', async () => {
+                    if (window.gameSfx) window.gameSfx.click();
+                    const selected = box.querySelector('input[name="scenario"]:checked');
+                    if (!selected) {
+                        result.innerHTML = '<p class="error-text">Pick one option.</p>';
+                        return;
+                    }
+
+                    const picked = Number(selected.value);
+                    const correctIdx = Number(scenario.correctSenseIndex);
+                    const ok = Number.isFinite(correctIdx) ? picked === correctIdx : false;
+                    const color = ok ? '#10b981' : '#ef4444';
+
+                    const correctSense = senses[correctIdx];
+                    result.innerHTML = `
+                        <div style="padding: 15px; background: ${color}20; border: 2px solid ${color}; border-radius: 12px;">
+                            <h4 style="color: ${color}; margin: 0 0 0.5rem 0;">${ok ? '✅ Correct' : '❌ Not quite'}</h4>
+                            ${correctSense ? `<div class="muted">Correct: ${escapeHtml(correctSense.labelEnglish)}</div>` : ''}
+                            ${scenario.explanationEnglish ? `<div style="margin-top:0.5rem;">${escapeHtml(scenario.explanationEnglish)}</div>` : ''}
+                        </div>
+                    `;
+
+                    if (window.gameSfx) (ok ? window.gameSfx.correct() : window.gameSfx.wrong());
+                    await submitPractice('scenario', ok);
+                });
+            }
+        }
+
+        function renderDuelPractice() {
+            const box = document.getElementById('practiceBox');
+            if (!box) return;
+
+            const senses = Array.isArray(item.senses) ? item.senses : [];
+            if (senses.length < 2) {
+                box.innerHTML = '<div class="muted">Add at least 2 senses to play the duel.</div>';
+                return;
+            }
+
+            const pair = pickDuelPair();
+            if (!pair) {
+                box.innerHTML = '<div class="muted">No duel pair available.</div>';
+                return;
+            }
+
+            const sa = senses[pair.a];
+            const sb = senses[pair.b];
+            const prompt = pickDuelPrompt(sa, sb);
+
+            // If both are essentially the same level, don't loop forever
+            if (!prompt.correct) {
+                box.innerHTML = '<div class="muted">Not enough contrast between senses for a duel. Add one formal/polite sense and one informal sense to make this game exciting.</div>';
+                return;
+            }
+
+            box.innerHTML = `
+                <div class="quiz-question">Politeness Duel</div>
+                <div class="muted" style="margin-bottom: 0.8rem;">${escapeHtml(prompt.question)}</div>
+
+                <div class="duel-grid">
+                    <div class="duel-card" id="duelA">
+                        <div class="duel-badge">A • ${escapeHtml((sa.register || 'neutral') + ' / ' + (sa.tone || 'neutral'))}</div>
+                        <div class="urdu-text" dir="rtl" style="margin-top:0.75rem; font-size:1.5rem; line-height:2;">${escapeHtml(sa.exampleUrdu || '')}</div>
+                        <div class="muted" style="margin-top:0.5rem;">${escapeHtml(sa.usageNotesEnglish || '')}</div>
+                    </div>
+                    <div class="duel-card" id="duelB">
+                        <div class="duel-badge">B • ${escapeHtml((sb.register || 'neutral') + ' / ' + (sb.tone || 'neutral'))}</div>
+                        <div class="urdu-text" dir="rtl" style="margin-top:0.75rem; font-size:1.5rem; line-height:2;">${escapeHtml(sb.exampleUrdu || '')}</div>
+                        <div class="muted" style="margin-top:0.5rem;">${escapeHtml(sb.usageNotesEnglish || '')}</div>
+                    </div>
+                </div>
+
+                <div style="display:flex; gap:0.75rem; flex-wrap:wrap; align-items:center; margin-top:1rem;">
+                    <button class="btn btn-primary" id="submitDuel">Submit</button>
+                    <button class="btn" id="nextDuel" type="button">Next duel</button>
+                </div>
+
+                <div class="result-box" id="duelResult"></div>
+            `;
+
+            let selected = null;
+            const aEl = document.getElementById('duelA');
+            const bEl = document.getElementById('duelB');
+            const resEl = document.getElementById('duelResult');
+
+            function setSel(which) {
+                selected = which;
+                aEl.classList.toggle('selected', which === 'a');
+                bEl.classList.toggle('selected', which === 'b');
+            }
+
+            aEl.addEventListener('click', () => {
+                if (window.gameSfx) window.gameSfx.click();
+                setSel('a');
+            });
+            bEl.addEventListener('click', () => {
+                if (window.gameSfx) window.gameSfx.click();
+                setSel('b');
+            });
+
+            document.getElementById('nextDuel')?.addEventListener('click', () => {
+                if (window.gameSfx) window.gameSfx.click();
+                renderDuelPractice();
+            });
+
+            document.getElementById('submitDuel')?.addEventListener('click', async () => {
+                if (window.gameSfx) window.gameSfx.click();
+
+                if (!selected) {
+                    resEl.innerHTML = '<p class="error-text">Pick A or B.</p>';
+                    if (window.gameSfx) window.gameSfx.wrong();
+                    if (window.xpUi) window.xpUi.toast('Choose one card first!', 'warn');
+                    return;
+                }
+
+                const ok = selected === prompt.correct;
+                const color = ok ? '#10b981' : '#ef4444';
+                resEl.innerHTML = `
+                    <div style="padding: 15px; background: ${color}20; border: 2px solid ${color}; border-radius: 12px;">
+                        <h4 style="color:${color}; margin:0;">${ok ? '✅ Nice!' : '❌ Not quite'}</h4>
+                        <div class="muted" style="margin-top:0.5rem;">Tip: Formal + polite is best for elders/teachers.</div>
+                    </div>
+                `;
+
+                if (window.gameSfx) (ok ? window.gameSfx.correct() : window.gameSfx.wrong());
+                await submitPractice('duel', ok);
+            });
+        }
+
+        // Wire tabs
+        const tabMeaning = document.getElementById('tabMeaning');
+        const tabScenario = document.getElementById('tabScenario');
+        const tabDuel = document.getElementById('tabDuel');
+
+        if (tabMeaning) {
+            tabMeaning.addEventListener('click', () => {
+                if (window.gameSfx) window.gameSfx.click();
+                setActiveTab('meaning');
+                renderMeaningPractice(currentSenseIdx);
+            });
+        }
+
+        if (tabScenario) {
+            tabScenario.addEventListener('click', () => {
+                if (window.gameSfx) window.gameSfx.click();
+                setActiveTab('scenario');
+                renderScenarioPractice();
+            });
+        }
+
+        if (tabDuel) {
+            tabDuel.addEventListener('click', () => {
+                if (window.gameSfx) window.gameSfx.click();
+                setActiveTab('duel');
+                renderDuelPractice();
+            });
+        }
+
+        // Extend active tab logic
+        const _setActiveTab = setActiveTab;
+        setActiveTab = function (which) {
+            const tabMeaning = document.getElementById('tabMeaning');
+            const tabScenario = document.getElementById('tabScenario');
+            const tabDuel = document.getElementById('tabDuel');
+            if (!tabMeaning || !tabScenario || !tabDuel) return _setActiveTab(which);
+
+            [tabMeaning, tabScenario, tabDuel].forEach((t) => t.classList.remove('active'));
+            if (which === 'scenario') tabScenario.classList.add('active');
+            else if (which === 'duel') tabDuel.classList.add('active');
+            else tabMeaning.classList.add('active');
+        };
+
+        let currentSenseIdx = 0;
+
+        // Init
+        (function () {
+            const defaultIdx = 0;
+            currentSenseIdx = defaultIdx;
+            renderSenseList(defaultIdx);
+            renderSenseDetail(defaultIdx);
+            setActiveTab('meaning');
+            renderMeaningPractice(defaultIdx);
+        })();
+    </script>
+</body>
+
+</html>

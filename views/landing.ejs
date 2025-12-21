@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Urdu Learning App</title>
+  <script src="/js/ui-preferences.js"></script>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+
+<body class="landing">
+    <div class="landing-bg" aria-hidden="true"></div>
+
+    <header class="landing-topbar">
+        <a class="landing-brand" href="/">
+            <img class="landing-logo" src="/images/logo.svg" alt="Urdu Learner Logo" />
+            <span class="landing-brand-text">
+                <span class="landing-brand-title">Urdu Learner</span>
+                <span class="landing-brand-subtitle">Speak • Read • Practice</span>
+            </span>
+        </a>
+
+        <nav class="landing-actions">
+            <a class="btn btn-small landing-link" href="/login">Login</a>
+            <a class="btn btn-primary btn-small" href="/signup">Sign up</a>
+        </nav>
+    </header>
+
+    <main class="landing-shell">
+        <section class="landing-hero">
+            <div class="landing-hero-copy">
+                <h1 class="landing-title">Learn Urdu with real practice and fast feedback</h1>
+                <p class="landing-subtitle">Interactive lessons, pronunciation practice, and progress tracking — all in one clean dashboard.</p>
+
+                <div class="cta-buttons landing-cta">
+                    <a href="/signup" class="btn btn-primary">Get Started</a>
+                    <a href="/login" class="btn landing-secondary">I already have an account</a>
+                </div>
+
+                <div class="landing-kpis">
+                    <div class="kpi">
+                        <div class="kpi-value">50</div>
+                        <div class="kpi-label">Lessons</div>
+                    </div>
+                    <div class="kpi">
+                        <div class="kpi-value">Urdu</div>
+                        <div class="kpi-label">Speech practice</div>
+                    </div>
+                    <div class="kpi">
+                        <div class="kpi-value">Points</div>
+                        <div class="kpi-label">Motivation</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="landing-cards" id="featureCards">
+                <button class="feature-card" type="button" data-feature="lessons">
+                    <div class="feature-emoji">📚</div>
+                    <div class="feature-title">Structured path</div>
+                    <div class="feature-text">Start at the right level with a placement test, then follow 50 lessons from basics to advanced.</div>
+                </button>
+                <button class="feature-card" type="button" data-feature="speech">
+                    <div class="feature-emoji">🎤</div>
+                    <div class="feature-title">Pronunciation practice</div>
+                    <div class="feature-text">Listen with Google Translate TTS, speak, and see your transcript + score instantly.</div>
+                </button>
+                <button class="feature-card" type="button" data-feature="progress">
+                    <div class="feature-emoji">🏆</div>
+                    <div class="feature-title">Progress & badges</div>
+                    <div class="feature-text">Earn points, track scores per lesson, and unlock badge tiers as your accuracy improves.</div>
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Make feature boxes feel interactive (click to "focus" a card)
+        (function () {
+            const cards = document.querySelectorAll('#featureCards .feature-card');
+            if (!cards || cards.length === 0) return;
+
+            cards.forEach((c) => {
+                c.addEventListener('click', () => {
+                    cards.forEach((x) => x.classList.remove('is-active'));
+                    c.classList.add('is-active');
+                });
+            });
+
+            // Default focus
+            cards[0].classList.add('is-active');
+        })();
+    </script>
+</body>
+
+</html>

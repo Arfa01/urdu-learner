@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Games - Urdu Learning</title>
+    <script src="/js/ui-preferences.js"></script>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <h2>🇵🇰 Urdu Learning App</h2>
+        <div class="nav-right">
+            <span class="user-name">Welcome, <%= user.username %>!</span>
+            <a href="/dashboard" class="btn btn-small">Dashboard</a>
+            <a href="/logout" class="btn btn-small btn-danger">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container games-page">
+        <h1 style="margin-bottom: 1rem;">🎮 Urdu Word Games</h1>
+        <p class="muted" style="margin-bottom: 1.5rem;">Practice Urdu vocabulary with fun mini-games: scramble, crossword, matching, and hangman.</p>
+
+        <div class="games-tabs" id="gamesTabs">
+            <button class="tab active" data-game="scramble">Scramble</button>
+            <button class="tab" data-game="crossword">Crossword</button>
+            <button class="tab" data-game="matching">Matching</button>
+            <button class="tab" data-game="hangman">Hangman</button>
+            <button class="tab" data-game="bingo">Bingo</button>
+        </div>
+
+        <div class="games-panels">
+            <!-- Scramble -->
+            <section class="game-panel" data-game-panel="scramble">
+                <h2>🔤 Word Scramble (Urdu)</h2>
+                <p class="muted">Rearrange the shuffled letters to form the correct Urdu word.</p>
+                <div id="scrambleWordDisplay" class="game-box"></div>
+                <div id="scrambleLetters" class="letters-row"></div>
+                <div class="game-actions">
+                    <button id="scrambleClear" class="btn btn-small">Clear</button>
+                    <button id="scrambleCheck" class="btn btn-small btn-primary">Check</button>
+                    <button id="scrambleNext" class="btn btn-small">Next word</button>
+                </div>
+                <div id="scrambleFeedback" class="game-feedback"></div>
+            </section>
+
+            <!-- Crossword -->
+            <section class="game-panel" data-game-panel="crossword" style="display:none;">
+                <h2>🧩 Mini Crossword (Urdu)</h2>
+                <p class="muted">Fill the grid with Urdu words using the English hints.</p>
+                <div id="crosswordGrid" class="crossword-grid"></div>
+                <div class="game-actions">
+                    <button id="crosswordCheck" class="btn btn-small btn-primary">Check</button>
+                    <button id="crosswordNew" class="btn btn-small">New puzzle</button>
+                </div>
+                <div id="crosswordClues" class="crossword-clues"></div>
+                <div id="crosswordFeedback" class="game-feedback"></div>
+            </section>
+
+            <!-- Matching -->
+            <section class="game-panel" data-game-panel="matching" style="display:none;">
+                <h2>🔊 Matching (Word → Sound/Meaning)</h2>
+                <p class="muted">Match each Urdu word with its correct English meaning card. Meanings can also play the Urdu sound.</p>
+                <div class="matching-layout">
+                    <div id="matchingWords" class="matching-column"></div>
+                    <div id="matchingMeanings" class="matching-column"></div>
+                </div>
+                <div class="game-actions">
+                    <button id="matchingNew" class="btn btn-small">New set</button>
+                </div>
+                <div id="matchingFeedback" class="game-feedback"></div>
+            </section>
+
+            <!-- Hangman -->
+            <section class="game-panel" data-game-panel="hangman" style="display:none;">
+                <h2>⚖️ Hangman (Urdu)</h2>
+                <p class="muted">Guess the hidden Urdu word before you run out of lives.</p>
+                <div id="hangmanWord" class="hangman-word"></div>
+                <div id="hangmanStatus" class="game-feedback"></div>
+                <div id="hangmanLetters" class="letters-row"></div>
+                <div class="game-actions">
+                    <button id="hangmanRestart" class="btn btn-small">New word</button>
+                </div>
+            </section>
+
+            <!-- Bingo -->
+            <section class="game-panel" data-game-panel="bingo" style="display:none;">
+                <h2>🔔 بنگو / Bingo</h2>
+                <p class="muted">Vocabulary, audio, یا grammar بنگو کھیلیں۔ ایک ہی room code دوستوں کے ساتھ شیئر کریں تاکہ سب کی grid ایک جیسی ہو۔</p>
+
+                <div class="bingo-top">
+                    <div class="bingo-room">
+                        <label class="muted" for="bingoRoomInput">Room code</label>
+                        <div class="inline-form" style="margin-top: 0.3rem;">
+                            <input id="bingoRoomInput" class="input" style="max-width: 180px;" placeholder="e.g. URDU1" />
+                            <button id="bingoJoinBtn" class="btn btn-small" type="button">Join / Create</button>
+                        </div>
+                        <p class="muted" id="bingoShareText" style="margin-top: 0.35rem; font-size: 0.85rem;"></p>
+                    </div>
+
+                    <div class="bingo-modes">
+                        <span class="muted">Mode:</span>
+                        <div class="bingo-mode-buttons">
+                            <button class="btn btn-small bingo-mode-btn" data-bingo-mode="vocab">Vocabulary</button>
+                            <button class="btn btn-small bingo-mode-btn" data-bingo-mode="audio">Audio</button>
+                            <button class="btn btn-small bingo-mode-btn" data-bingo-mode="grammar">Grammar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bingo-call">
+                    <div class="muted">Current call:</div>
+                    <div id="bingoCurrentCall" class="game-box" style="margin-top: 0.25rem; min-height: 2.2rem; font-size: 1.2rem;"></div>
+                    <div class="game-actions" style="margin-top: 0.5rem;">
+                        <button id="bingoNextCall" class="btn btn-small btn-primary" type="button">Next call</button>
+                        <button id="bingoPlayAudio" class="btn btn-small" type="button">Play audio</button>
+                    </div>
+                </div>
+
+                <div class="bingo-grid-wrapper">
+                    <table id="bingoGrid" class="bingo-grid"></table>
+                </div>
+
+                <div id="bingoStatus" class="game-feedback" style="margin-top: 0.75rem;"></div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        window.WORD_GAMES_DATA = {
+            words: <%- JSON.stringify(gameWords || []) %>,
+            grammarConcepts: <%- JSON.stringify(typeof grammarConcepts !== 'undefined' ? grammarConcepts : []) %>
+        };
+    </script>
+    <script src="/js/word-games.js"></script>
+</body>
+</html>

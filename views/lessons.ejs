@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>All Lessons - Urdu Learning</title>
+  <script src="/js/ui-preferences.js"></script>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+
+<body>
+  <nav class="navbar">
+    <h2>📚 All Lessons</h2>
+    <div class="nav-right">
+      <span class="points">🏆 <%= user.totalPoints %> points</span>
+      <span class="rank-badge" data-rank="<%= user.rank || 'Bronze' %>">🏅 <%= user.rank || 'Bronze' %></span>
+      <span class="streak-badge">🔥 <%= (user.practiceStats && user.practiceStats.currentStreak) ? user.practiceStats.currentStreak : 0 %> day streak</span>
+      <a href="/dashboard" class="btn btn-small">Dashboard</a>
+      <a href="/logout" class="btn btn-small">Logout</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="dashboard-hero">
+      <div class="dashboard-hero-left">
+        <h3 style="margin-bottom: 0.35rem;">Choose your lesson</h3>
+        <p class="progress-text" style="margin:0;">Search, filter by difficulty, or continue your current lesson.</p>
+      </div>
+      <div class="dashboard-hero-actions">
+        <a class="btn btn-primary" href="/lesson/<%= currentLessonNumber %>">Continue Lesson <%= currentLessonNumber %> →</a>
+      </div>
+    </div>
+
+    <div class="assessment-section" style="padding-bottom: 1.25rem;">
+      <div class="tabs" style="justify-content: space-between; align-items: center;">
+        <div class="tabs">
+          <a class="tab <%= difficulty === 'all' ? 'active' : '' %>" href="/lessons?difficulty=all<%= q ? ('&q=' + encodeURIComponent(q)) : '' %>">All</a>
+          <a class="tab <%= difficulty === 'beginner' ? 'active' : '' %>" href="/lessons?difficulty=beginner<%= q ? ('&q=' + encodeURIComponent(q)) : '' %>">Beginner</a>
+          <a class="tab <%= difficulty === 'intermediate' ? 'active' : '' %>" href="/lessons?difficulty=intermediate<%= q ? ('&q=' + encodeURIComponent(q)) : '' %>">Intermediate</a>
+          <a class="tab <%= difficulty === 'advanced' ? 'active' : '' %>" href="/lessons?difficulty=advanced<%= q ? ('&q=' + encodeURIComponent(q)) : '' %>">Advanced</a>
+        </div>
+
+        <form class="inline-form" method="GET" action="/lessons" style="margin: 0;">
+          <input type="hidden" name="difficulty" value="<%= difficulty %>" />
+          <input name="q" value="<%= q %>" placeholder="Search by lesson # or title..." class="input" />
+          <button class="btn btn-primary" type="submit">Search</button>
+          <a class="btn" href="/lessons?difficulty=<%= difficulty %>">Clear</a>
+        </form>
+      </div>
+    </div>
+
+    <div class="lessons-grid lessons-grid-compact">
+      <% (levels || []).forEach((level) => { %>
+        <% const n = level.levelNumber; %>
+        <% const meta = (lessonMeta && lessonMeta[n]) ? lessonMeta[n] : { totalPercent: 0, totalOutOf10: 0, badges: 0 }; %>
+        <% const isCurrent = Number(currentLessonNumber) === Number(n); %>
+
+        <div class="lesson-card lesson-card-compact <%= user.completedLessons.includes(n) ? 'completed' : '' %> <%= meta.badges ? ('badge-tier-' + meta.badges) : '' %> <%= isCurrent ? 'is-current' : '' %>">
+          <div class="lesson-header">
+            <h4>Lesson <%= n %></h4>
+            <% const diffLabel = (level.difficultyLevel || '').trim() || (n <= 10 ? 'beginner' : n <= 30 ? 'intermediate' : 'advanced'); %>
+            <span class="level-badge" style="text-transform: capitalize;"><%= diffLabel %></span>
+          </div>
+
+          <p class="lesson-title"><%= level.title %></p>
+
+          <% if (level.isPlaceholder) { %>
+            <div class="pill" style="display:inline-block; background:#fff7ed; color:#b45309; margin-bottom: 0.6rem;">Placeholder</div>
+          <% } %>
+
+          <% if (level.vocabularyTheme || level.grammarFocus) { %>
+            <div class="muted" style="margin-bottom: 0.6rem;">
+              <%= level.vocabularyTheme || '' %><%= (level.vocabularyTheme && level.grammarFocus) ? ' • ' : '' %><%= level.grammarFocus || '' %>
+            </div>
+          <% } %>
+
+          <% if (meta.totalPercent > 0) { %>
+            <div class="lesson-score">Score: <strong><%= meta.totalOutOf10 %>/10</strong> (<%= meta.totalPercent %>%)</div>
+          <% } %>
+
+          <% if (meta.badges > 0) { %>
+            <div class="lesson-badges" aria-label="Badges">
+              <% for (let i = 0; i < meta.badges; i++) { %>
+                <span class="star">★</span>
+              <% } %>
+            </div>
+          <% } %>
+
+          <% if (isCurrent) { %>
+            <div class="pill" style="display:inline-block; margin-bottom: 0.85rem;">Current</div>
+          <% } %>
+
+          <% if (user.completedLessons.includes(n)) { %>
+            <span class="badge-completed">✓ Completed</span>
+          <% } %>
+
+          <a href="/lesson/<%= n %>" class="btn btn-primary btn-full"><%= isCurrent ? 'Continue' : 'Open Lesson' %></a>
+        </div>
+      <% }) %>
+    </div>
+
+    <% if (!levels || levels.length === 0) { %>
+      <div class="progress-summary" style="margin-top: 1.5rem;">
+        <h3>No lessons found</h3>
+        <p class="progress-text" style="margin:0;">Try clearing your search or choosing a different difficulty.</p>
+      </div>
+    <% } %>
+  </div>
+</body>
+
+</html>

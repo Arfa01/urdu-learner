@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ur">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Urdu Level <%= level.levelNumber %>
+    </title>
+    <script src="/js/ui-preferences.js"></script>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        #tooltip {
+            display: none;
+            position: absolute;
+            background: #333;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            z-index: 1000;
+        }
+
+        .loading-audio {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>Level <%= level.levelNumber %>
+        </h1>
+
+        <div id="tooltip"></div>
+
+        <div class="card">
+            <h3>Speak this word:</h3>
+
+            <h2 id="target-text" class="urdu-text">
+                <%= level.words[0].urdu %>
+            </h2>
+
+            <div class="controls">
+                <button id="play-btn" onclick="downloadAndPlayAudio('<%= level.words[0].urdu %>')">
+                    🔊 Listen
+                </button>
+                <button id="record-btn">🎤 Record Voice</button>
+            </div>
+
+            <div id="result-area" style="margin-top: 20px;">
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/urdu-similarity.js"></script>
+    <script src="/js/recorder.js"></script>
+
+    <script>
+        // DOUBLE CLICK DICTIONARY LOGIC
+        document.addEventListener('dblclick', function (e) {
+            const selection = window.getSelection().toString().trim();
+            if (selection) {
+                const tooltip = document.getElementById('tooltip');
+
+                const targetWord = "<%= level.words[0].urdu %>";
+                const englishMeaning = "<%= level.words[0].english %>";
+
+                let meaning = (selection === targetWord) ? englishMeaning : "Meaning not found (Try double-clicking the main word)";
+
+                tooltip.style.left = e.pageX + 'px';
+                tooltip.style.top = e.pageY + 'px';
+                tooltip.innerText = meaning;
+                tooltip.style.display = 'block';
+
+                setTimeout(() => { tooltip.style.display = 'none'; }, 3000);
+            }
+        });
+    </script>
+
+</body>
+
+</html>

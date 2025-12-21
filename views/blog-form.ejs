@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= action === 'edit' ? 'Edit post' : 'Write a new post' %> - Community Blog</title>
+  <script src="/js/ui-preferences.js"></script>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <h2>📰 Community Blog</h2>
+    <div class="nav-right">
+      <% if (user) { %>
+        <span class="points">🏆 <%= user.totalPoints %> points</span>
+        <span class="rank-badge" data-rank="<%= user.rank || 'Bronze' %>">🏅 <%= user.rank || 'Bronze' %></span>
+        <span class="streak-badge">🔥 <%= (user.practiceStats && user.practiceStats.currentStreak) ? user.practiceStats.currentStreak : 0 %> day streak</span>
+      <% } %>
+      <a href="/blog" class="btn btn-small">← Back to stories</a>
+      <a href="/dashboard" class="btn btn-small">Dashboard</a>
+      <a href="/logout" class="btn btn-small">Logout</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="assessment-section">
+      <div class="content-header">
+        <h3><%= action === 'edit' ? 'Edit your post' : 'Write a new post' %></h3>
+        <div class="muted">Only you (the author) will be able to edit or delete this story.</div>
+      </div>
+
+      <form method="POST" action="<%= action === 'edit' ? ('/blog/' + story._id + '/edit') : '/blog' %>">
+        <div class="learn-subsection">
+          <label for="title" class="muted" style="display:block; margin-bottom:0.35rem;">Post title (in English or Urdu)</label>
+          <input id="title" name="title" class="input" maxlength="140" required value="<%= story ? story.title : '' %>" />
+        </div>
+
+        <div class="learn-subsection" style="margin-top:1rem;">
+          <div class="learn-subtitle">
+            <span>Post text (Urdu)</span>
+            <span class="muted">You can write directly in Urdu. The text box is right‑to‑left.</span>
+          </div>
+          <textarea name="urduText" class="learn-textarea urdu-text" dir="rtl" rows="10" required><%= story ? story.urduText : '' %></textarea>
+        </div>
+
+        <div class="learn-subsection" style="margin-top:1rem;">
+          <label class="muted" style="display:block; margin-bottom:0.35rem;">English summary (optional)</label>
+          <textarea name="englishSummary" class="learn-textarea" rows="4" placeholder="Short English summary to help learners..."><%= story && story.englishSummary ? story.englishSummary : '' %></textarea>
+        </div>
+
+        <div class="learn-subsection" style="margin-top:1rem;">
+          <label class="muted" style="display:block; margin-bottom:0.35rem;">Tags (comma separated)</label>
+          <input name="tags" class="input" placeholder="e.g. children, moral, family" value="<%= story && Array.isArray(story.tags) ? story.tags.join(', ') : '' %>" />
+        </div>
+
+        <div class="panel-footer" style="justify-content:flex-start; margin-top:1.25rem;">
+          <button type="submit" class="btn btn-primary"><%= action === 'edit' ? 'Save changes' : 'Publish post' %></button>
+        </div>
+      </form>
+    </div>
+  </div>
+</body>
+</html>
